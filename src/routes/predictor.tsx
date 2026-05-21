@@ -10,6 +10,8 @@ import {
   INTEREST_OPTIONS,
   GRADE_OPTIONS,
   SUBJECT_COMBOS,
+  UNIVERSITIES,
+  getUniversity,
   type PredictorInput,
   type PredictorResult,
   type CoursePrediction,
@@ -34,17 +36,21 @@ import {
 export const Route = createFileRoute("/predictor")({
   head: () => ({
     meta: [
-      { title: "LASU Course Predictor — Augur.edu" },
+      { title: "Nigerian University Course Predictor — Augur.edu" },
       {
         name: "description",
         content:
-          "Predict the LASU course you can study based on your JAMB score, Post-UTME, and O'Level grades. Download a full PDF report.",
+          "Pick any Nigerian university (LASU, UNILAG, UI, OAU, UNN, ABU and more) and predict the course you can study from your JAMB, Post-UTME and O'Level. Download a full PDF report.",
       },
-      { property: "og:title", content: "LASU Course Predictor" },
+      { property: "og:title", content: "Nigerian University Course Predictor" },
       {
         property: "og:description",
-        content: "Know your LASU admission chances before you apply.",
+        content: "Predict your admission chances at any Nigerian university.",
       },
+    ],
+  }),
+  component: PredictorPage,
+});
     ],
   }),
   component: PredictorPage,
@@ -55,11 +61,12 @@ const DEFAULT_GRADES: OLevelGrade[] = ["B3", "B3", "C4", "C4", "C5"];
 const O_LEVEL_LABELS = ["English Language", "Mathematics", "Subject 3", "Subject 4", "Subject 5"];
 
 const DEFAULTS: PredictorInput = {
+  universityId: "lasu",
   jambScore: 220,
   postUtmeScore: 65,
   oLevelGrades: DEFAULT_GRADES,
   subjectCombo: "science",
-  state: "lagos",
+  isIndigene: true,
   interests: ["tech", "science"],
 };
 
