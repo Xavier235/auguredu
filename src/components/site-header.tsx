@@ -1,8 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Sparkles, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export function SiteHeader() {
   const { location } = useRouterState();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const links = [
     { to: "/", label: "Home" },
     { to: "/predictor", label: "Predictor" },
@@ -40,12 +43,30 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <Link
-          to="/predictor"
-          className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:glow-primary"
-        >
-          Try it free
-        </Link>
+        {user ? (
+          <div className="flex items-center gap-2">
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              {user.email}
+            </span>
+            <button
+              onClick={async () => {
+                await signOut();
+                navigate({ to: "/" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent/20"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/auth"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:glow-primary"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </header>
   );
