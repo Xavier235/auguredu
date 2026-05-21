@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as CgpaRouteImport } from './routes/cgpa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CgpaRoute = CgpaRouteImport.update({
+  id: '/cgpa',
+  path: '/cgpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cgpa': typeof CgpaRoute
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cgpa': typeof CgpaRoute
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
@@ -59,21 +67,36 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cgpa': typeof CgpaRoute
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/how-it-works' | '/predictor' | '/profile'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/cgpa'
+    | '/how-it-works'
+    | '/predictor'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/how-it-works' | '/predictor' | '/profile'
-  id: '__root__' | '/' | '/auth' | '/how-it-works' | '/predictor' | '/profile'
+  to: '/' | '/auth' | '/cgpa' | '/how-it-works' | '/predictor' | '/profile'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/cgpa'
+    | '/how-it-works'
+    | '/predictor'
+    | '/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CgpaRoute: typeof CgpaRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
@@ -102,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cgpa': {
+      id: '/cgpa'
+      path: '/cgpa'
+      fullPath: '/cgpa'
+      preLoaderRoute: typeof CgpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -122,6 +152,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CgpaRoute: CgpaRoute,
   HowItWorksRoute: HowItWorksRoute,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
