@@ -765,20 +765,24 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.text("LASU Course Predictor", margin, 50);
-  doc.setFont("helvetica", "normal");
+  doc.text(`${result.universityName} — Course Predictor`, margin, 50);
   doc.setFontSize(10);
   doc.text("Personalised JAMB / Admission Report — Augur.edu", margin, 70);
   y = 120;
 
   // ========== INPUT SUMMARY ==========
+  // ========== INPUT SUMMARY ==========
+  const uni = getUniversity(input.universityId);
   heading("Your Profile", 16);
+  body(`University: ${uni.name} (${uni.shortName}) — ${uni.type}, ${uni.state} State`);
   body(`JAMB UTME Score: ${input.jambScore} / 400`);
   body(`Post-UTME / Screening Score: ${input.postUtmeScore} / 100`);
   body(`Subject Combination: ${input.subjectCombo.toUpperCase()}`);
-  body(`State of Origin: ${input.state === "lagos" ? "Lagos State (Indigene)" : "Non-indigene"}`);
+  body(
+    `Indigene status: ${input.isIndigene ? `${uni.state} State indigene` : "Non-indigene"}`,
+  );
   body(`O'Level Grades: ${input.oLevelGrades.join(", ")}  (${result.oLevelPoints}/30 grade points)`);
   body(`Interests: ${input.interests.join(", ") || "None selected"}`);
-  y += 6;
   divider();
 
   // ========== AGGREGATE ==========
@@ -794,9 +798,9 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   );
   y += 4;
   divider();
-
-  // ========== BREAKDOWN ==========
-  heading("Score Breakdown", 16);
+  body(
+    `${uni.shortName} computes admission using a weighted formula: ${uni.formula.jamb}% JAMB + ${uni.formula.postUtme}% Post-UTME${uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : ""}.${uni.indigeneBonus > 0 ? ` ${uni.state} State indigenes typically benefit from cutoffs ~${uni.indigeneBonus} marks lower.` : ""}`,
+  );
   result.breakdown.forEach((b) => {
     subheading(`${b.label}  —  ${b.value} / ${b.weight}`);
     body(b.detail);
