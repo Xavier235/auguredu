@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      predictions: {
+        Row: {
+          aggregate_score: number
+          created_at: string
+          id: string
+          input: Json
+          jamb_score: number
+          label: string | null
+          result: Json
+          top_course: string | null
+          top_course_chance: number | null
+          user_id: string
+        }
+        Insert: {
+          aggregate_score: number
+          created_at?: string
+          id?: string
+          input: Json
+          jamb_score: number
+          label?: string | null
+          result: Json
+          top_course?: string | null
+          top_course_chance?: number | null
+          user_id: string
+        }
+        Update: {
+          aggregate_score?: number
+          created_at?: string
+          id?: string
+          input?: Json
+          jamb_score?: number
+          label?: string | null
+          result?: Json
+          top_course?: string | null
+          top_course_chance?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
