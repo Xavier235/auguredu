@@ -255,35 +255,6 @@ function PredictorPage() {
             </div>
           </div>
 
-          {/* State */}
-          <div className="mt-8">
-            <label className="text-sm font-medium text-muted-foreground">
-              State of origin
-            </label>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {(
-                [
-                  { id: "lagos" as const, label: "Lagos State (Indigene)" },
-                  { id: "other" as const, label: "Other state" },
-                ]
-              ).map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => update("state", t.id)}
-                  className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
-                    input.state === t.id
-                      ? "border-primary bg-primary/15 text-foreground glow-primary"
-                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Interests */}
-          <div className="mt-8">
           {/* Indigene */}
           <div className="mt-8">
             <label className="text-sm font-medium text-muted-foreground">
@@ -315,11 +286,39 @@ function PredictorPage() {
             )}
           </div>
 
+          {/* Interests */}
+          <div className="mt-8">
+            <label className="text-sm font-medium text-muted-foreground">
+              Areas you're interested in
+            </label>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {INTEREST_OPTIONS.map((opt) => {
+                const active = input.interests.includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => toggleInterest(opt.id)}
+                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <button
               onClick={run}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground transition-all hover:glow-primary"
             >
               <Sparkles className="h-4 w-4" />
-              Predict my LASU course
+              Predict my {uni.shortName} course
             </button>
             <button
               onClick={reset}
@@ -330,6 +329,7 @@ function PredictorPage() {
             </button>
           </div>
         </div>
+
 
         {/* Result */}
         {result && (
