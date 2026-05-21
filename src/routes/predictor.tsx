@@ -494,8 +494,7 @@ function ResultPanel({
       <div className="glass rounded-3xl p-8">
         <h3 className="font-display text-xl font-semibold">Predictor breakdown</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          How LASU's screening formula composes your aggregate score (50% JAMB + 30%
-          Post-UTME + 20% O'Level, with indigene adjustment).
+          How {result.universityName}'s screening formula composes your aggregate score.
         </p>
         <div className="mt-6 space-y-4">
           {result.breakdown.map((b) => (
@@ -526,7 +525,7 @@ function ResultPanel({
       {/* Top courses */}
       <div className="glass rounded-3xl p-8">
         <h3 className="font-display text-xl font-semibold">
-          Top {result.topCourses.length} recommended LASU courses
+          Top {result.topCourses.length} recommended courses at {result.universityName}
         </h3>
         <div className="mt-5 space-y-3">
           {result.topCourses.map((c) => (
@@ -619,9 +618,9 @@ function ResultPanel({
       </div>
 
       <p className="pt-2 text-center text-xs text-muted-foreground">
-        Estimates are based on recent LASU JAMB departmental cutoffs and the
-        50/30/20 screening formula. Always confirm with the official LASU
-        admissions brochure for the current year.
+        Estimates use recent JAMB departmental cutoffs at {result.universityName} and
+        its screening formula. Always confirm with the official brochure for the
+        current admission year.
       </p>
     </div>
   );
