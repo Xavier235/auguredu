@@ -859,12 +859,12 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
     doc.setFontSize(8);
     doc.setTextColor(140, 140, 160);
     doc.text(
-      "Estimates based on recent LASU JAMB cutoffs. Confirm with the official LASU brochure for the current admission year.",
+      `Estimates based on recent ${uni.shortName} JAMB cutoffs. Confirm with the official ${uni.shortName} brochure for the current admission year.`,
       margin,
       pageH - 24,
     );
     doc.text(`Page ${i} of ${pageCount}`, pageW - margin - 60, pageH - 24);
   }
 
-  doc.save(`LASU-Course-Prediction-${input.jambScore}.pdf`);
+  doc.save(`${uni.shortName}-Course-Prediction-${input.jambScore}.pdf`);
 }
