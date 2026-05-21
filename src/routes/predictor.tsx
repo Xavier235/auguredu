@@ -764,13 +764,12 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text("LASU Course Predictor", margin, 50);
   doc.text(`${result.universityName} — Course Predictor`, margin, 50);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text("Personalised JAMB / Admission Report — Augur.edu", margin, 70);
   y = 120;
 
-  // ========== INPUT SUMMARY ==========
   // ========== INPUT SUMMARY ==========
   const uni = getUniversity(input.universityId);
   heading("Your Profile", 16);
@@ -783,6 +782,7 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   );
   body(`O'Level Grades: ${input.oLevelGrades.join(", ")}  (${result.oLevelPoints}/30 grade points)`);
   body(`Interests: ${input.interests.join(", ") || "None selected"}`);
+  y += 6;
   divider();
 
   // ========== AGGREGATE ==========
@@ -794,13 +794,13 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   doc.text(`${result.aggregateScore} / 100`, margin, y + 30);
   y += 44;
   body(
-    "LASU computes admission using a weighted formula: 50% JAMB + 30% Post-UTME + 20% O'Level. Lagos State indigenes typically benefit from cutoffs ~8 marks lower.",
+    `${uni.shortName} computes admission using a weighted formula: ${uni.formula.jamb}% JAMB + ${uni.formula.postUtme}% Post-UTME${uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : ""}.${uni.indigeneBonus > 0 ? ` ${uni.state} State indigenes typically benefit from cutoffs ~${uni.indigeneBonus} marks lower.` : ""}`,
   );
   y += 4;
   divider();
-  body(
-    `${uni.shortName} computes admission using a weighted formula: ${uni.formula.jamb}% JAMB + ${uni.formula.postUtme}% Post-UTME${uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : ""}.${uni.indigeneBonus > 0 ? ` ${uni.state} State indigenes typically benefit from cutoffs ~${uni.indigeneBonus} marks lower.` : ""}`,
-  );
+
+  // ========== BREAKDOWN ==========
+  heading("Score Breakdown", 16);
   result.breakdown.forEach((b) => {
     subheading(`${b.label}  —  ${b.value} / ${b.weight}`);
     body(b.detail);
