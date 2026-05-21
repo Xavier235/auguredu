@@ -101,36 +101,47 @@ function Home() {
           <div className="grid gap-5 md:grid-cols-3">
             {[
               {
-                icon: ChartLine,
-                title: "Grade & GPA Forecast",
-                body: "A weighted projection of your end-of-term performance based on study habits, attendance, and trajectory.",
+                icon: GraduationCap,
+                title: "JAMB → LASU admission",
+                body: "Haven't entered school yet? Plug in your JAMB, Post-UTME and O'Level — see exactly which LASU courses you'll get in for.",
+                to: "/predictor",
+                cta: "Run admission predictor",
               },
               {
-                icon: GraduationCap,
-                title: "Admission Probability",
-                body: "Honest admit odds for your target tier — Ivy, Top-50, State, or Regional — calibrated by profile strength.",
+                icon: ChartLine,
+                title: "CGPA forecast",
+                body: "Already a LASU student? Project your next semester GPA and end-of-degree CGPA from your current courses and expected grades.",
+                to: "/cgpa",
+                cta: "Forecast my CGPA",
               },
               {
                 icon: Compass,
-                title: "Major & Career Fit",
-                body: "Ranked majors that match your interests and predicted academic strengths. No fluff, no horoscopes.",
+                title: "Personal study workflow",
+                body: "Get a weekly study plan tuned to your target CGPA, attendance, sleep and current study hours — no fluff.",
+                to: "/cgpa",
+                cta: "Build my study plan",
               },
             ].map((f, i) => (
-              <div
+              <Link
                 key={i}
-                className="glass group relative overflow-hidden rounded-3xl p-7 transition-all hover:-translate-y-1"
+                to={f.to}
+                className="glass group relative flex flex-col overflow-hidden rounded-3xl p-7 transition-all hover:-translate-y-1"
               >
                 <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 ring-1 ring-primary/40">
                   <f.icon className="h-5 w-5 text-foreground" />
                 </div>
                 <h3 className="font-display text-xl font-semibold">{f.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
                   {f.body}
                 </p>
-              </div>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                  {f.cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
             ))}
           </div>
         </section>
+
 
         {/* How signal works */}
         <section className="mx-auto max-w-7xl px-6 py-20">
