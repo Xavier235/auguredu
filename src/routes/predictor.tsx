@@ -51,10 +51,6 @@ export const Route = createFileRoute("/predictor")({
   }),
   component: PredictorPage,
 });
-    ],
-  }),
-  component: PredictorPage,
-});
 
 const DEFAULT_GRADES: OLevelGrade[] = ["B3", "B3", "C4", "C4", "C5"];
 
