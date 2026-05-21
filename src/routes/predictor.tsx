@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { jsPDF } from "jspdf";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import {
   predict,
   INTEREST_OPTIONS,
@@ -24,7 +26,10 @@ import {
   Download,
   CheckCircle2,
   XCircle,
+  Save,
+  Check,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/predictor")({
   head: () => ({
