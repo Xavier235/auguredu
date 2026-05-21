@@ -114,7 +114,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-  return (
+
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
