@@ -409,7 +409,7 @@ function ResultPanel({
     <div id="result" className="mt-16 scroll-mt-20 space-y-6">
       <div className="text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
-          Your LASU forecast
+          Your {result.universityName} forecast
         </div>
         <h2 className="mt-3 font-display text-4xl font-semibold md:text-5xl">
           Here's where you'll likely <span className="text-gradient">land</span>.
