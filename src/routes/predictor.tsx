@@ -134,6 +134,8 @@ function PredictorPage() {
   };
 
 
+  const uni = getUniversity(input.universityId);
+
   return (
     <div className="bg-grid min-h-screen">
       <SiteHeader />
@@ -142,20 +144,47 @@ function PredictorPage() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3 w-3 text-primary" />
-            Lagos State University — JAMB course predictor
+            Nigerian universities — JAMB course predictor
           </div>
           <h1 className="font-display text-4xl font-semibold md:text-5xl">
-            What can I study at <span className="text-gradient">LASU</span>?
+            What can I study at <span className="text-gradient">{uni.shortName}</span>?
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Enter your JAMB score, Post-UTME and O'Level results. We'll match you with
-            LASU courses you actually have a shot at — and you can download the full
-            breakdown as a PDF.
+            Pick your target university, then enter your JAMB, Post-UTME and O'Level.
+            We'll match you with courses you actually have a shot at — and you can
+            download the full breakdown as a PDF.
           </p>
         </div>
 
         {/* Form */}
         <div className="mt-12 glass rounded-3xl p-8 md:p-10">
+          {/* University selector */}
+          <div className="mb-8">
+            <label className="text-sm font-medium text-muted-foreground">
+              Target university
+            </label>
+            <select
+              value={input.universityId}
+              onChange={(e) => update("universityId", e.target.value)}
+              className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground focus:border-primary focus:outline-none"
+            >
+              {(["Federal", "State", "Private"] as const).map((group) => (
+                <optgroup key={group} label={`${group} universities`}>
+                  {UNIVERSITIES.filter((u) => u.type === group).map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.shortName}) — {u.state}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {uni.shortName} screening: {uni.formula.jamb}% JAMB + {uni.formula.postUtme}% Post-UTME
+              {uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : " (O'Level eligibility only)"}
+              {uni.indigeneBonus > 0 ? ` • ${uni.state} indigene bonus ~${uni.indigeneBonus} marks` : ""}
+            </p>
+          </div>
+
           <div className="grid gap-7 md:grid-cols-2">
             <SliderField
               label="JAMB UTME score"
@@ -255,32 +284,37 @@ function PredictorPage() {
 
           {/* Interests */}
           <div className="mt-8">
+          {/* Indigene */}
+          <div className="mt-8">
             <label className="text-sm font-medium text-muted-foreground">
-              Areas you're interested in
+              Are you an indigene of {uni.state} State?
             </label>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {INTEREST_OPTIONS.map((opt) => {
-                const active = input.interests.includes(opt.id);
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => toggleInterest(opt.id)}
-                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                { id: true, label: `Yes — ${uni.state} indigene` },
+                { id: false, label: "No / other state" },
+              ].map((t) => (
+                <button
+                  key={String(t.id)}
+                  onClick={() => update("isIndigene", t.id)}
+                  className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                    input.isIndigene === t.id
+                      ? "border-primary bg-primary/15 text-foreground glow-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
+            {uni.indigeneBonus === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {uni.shortName} ({uni.type}) does not apply an indigene bonus — the toggle
+                won't affect your score.
+              </p>
+            )}
           </div>
 
-          {/* Actions */}
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <button
               onClick={run}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground transition-all hover:glow-primary"
             >
