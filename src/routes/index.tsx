@@ -140,6 +140,8 @@ function Home() {
               </Link>
             ))}
           </div>
+        </section>
+
 
         {/* How signal works */}
         <section className="mx-auto max-w-7xl px-6 py-20">
