@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { jsPDF } from "jspdf";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import {
   predict,
   INTEREST_OPTIONS,
@@ -24,7 +26,10 @@ import {
   Download,
   CheckCircle2,
   XCircle,
+  Save,
+  Check,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/predictor")({
   head: () => ({
@@ -96,6 +101,35 @@ function PredictorPage() {
     if (!result) return;
     generatePdf(input, result);
   };
+
+  const { user } = useAuth();
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
+
+  const savePrediction = async () => {
+    if (!result || !user) return;
+    setSaveState("saving");
+    const top = result.topCourses[0];
+    const { error } = await supabase.from("predictions").insert({
+      user_id: user.id,
+      label: top ? `${top.course} (JAMB ${input.jambScore})` : `JAMB ${input.jambScore}`,
+      input: input as never,
+      result: result as never,
+      jamb_score: input.jambScore,
+      aggregate_score: result.aggregateScore,
+      top_course: top?.course ?? null,
+      top_course_chance: top?.admissionChance ?? null,
+    });
+    if (error) {
+      console.error(error);
+      setSaveState("error");
+    } else {
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 3000);
+    }
+  };
+
 
   return (
     <div className="bg-grid min-h-screen">
@@ -261,7 +295,17 @@ function PredictorPage() {
         </div>
 
         {/* Result */}
-        {result && <ResultPanel result={result} input={input} onDownload={downloadPdf} />}
+        {result && (
+          <ResultPanel
+            result={result}
+            input={input}
+            onDownload={downloadPdf}
+            onSave={savePrediction}
+            saveState={saveState}
+            isAuthed={!!user}
+          />
+        )}
+
       </main>
 
       <SiteFooter />
@@ -312,10 +356,16 @@ function ResultPanel({
   result,
   input,
   onDownload,
+  onSave,
+  saveState,
+  isAuthed,
 }: {
   result: PredictorResult;
   input: PredictorInput;
   onDownload: () => void;
+  onSave: () => void;
+  saveState: "idle" | "saving" | "saved" | "error";
+  isAuthed: boolean;
 }) {
   const top = result.topCourses[0];
   return (
@@ -327,14 +377,55 @@ function ResultPanel({
         <h2 className="mt-3 font-display text-4xl font-semibold md:text-5xl">
           Here's where you'll likely <span className="text-gradient">land</span>.
         </h2>
-        <button
-          onClick={onDownload}
-          className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-3 text-sm font-medium text-foreground transition-all hover:bg-primary/20 hover:glow-primary"
-        >
-          <Download className="h-4 w-4" />
-          Download full PDF report
-        </button>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={onDownload}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-3 text-sm font-medium text-foreground transition-all hover:bg-primary/20 hover:glow-primary"
+          >
+            <Download className="h-4 w-4" />
+            Download PDF report
+          </button>
+          {isAuthed ? (
+            <button
+              onClick={onSave}
+              disabled={saveState === "saving" || saveState === "saved"}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:glow-primary disabled:opacity-70"
+            >
+              {saveState === "saved" ? (
+                <>
+                  <Check className="h-4 w-4" /> Saved to profile
+                </>
+              ) : saveState === "saving" ? (
+                <>
+                  <Save className="h-4 w-4 animate-pulse" /> Saving…
+                </>
+              ) : saveState === "error" ? (
+                <>
+                  <Save className="h-4 w-4" /> Retry save
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" /> Save to my profile
+                </>
+              )}
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:glow-primary"
+            >
+              <Save className="h-4 w-4" />
+              Sign in to save
+            </Link>
+          )}
+        </div>
+        {saveState === "error" && (
+          <p className="mt-3 text-xs text-accent">
+            Couldn't save — please try again.
+          </p>
+        )}
       </div>
+
 
       {/* Top metrics */}
       <div className="grid gap-5 md:grid-cols-3">
