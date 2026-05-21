@@ -9,8 +9,10 @@ export function SiteHeader() {
   const links = [
     { to: "/", label: "Home" },
     { to: "/predictor", label: "Predictor" },
+    ...(user ? [{ to: "/profile", label: "My profile" }] : []),
     { to: "/how-it-works", label: "How it works" },
   ];
+
 
   return (
     <header className="sticky top-0 z-50 w-full">
