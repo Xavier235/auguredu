@@ -295,7 +295,17 @@ function PredictorPage() {
         </div>
 
         {/* Result */}
-        {result && <ResultPanel result={result} input={input} onDownload={downloadPdf} />}
+        {result && (
+          <ResultPanel
+            result={result}
+            input={input}
+            onDownload={downloadPdf}
+            onSave={savePrediction}
+            saveState={saveState}
+            isAuthed={!!user}
+          />
+        )}
+
       </main>
 
       <SiteFooter />
