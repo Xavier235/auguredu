@@ -10,6 +10,8 @@ import {
   INTEREST_OPTIONS,
   GRADE_OPTIONS,
   SUBJECT_COMBOS,
+  UNIVERSITIES,
+  getUniversity,
   type PredictorInput,
   type PredictorResult,
   type CoursePrediction,
@@ -34,16 +36,16 @@ import {
 export const Route = createFileRoute("/predictor")({
   head: () => ({
     meta: [
-      { title: "LASU Course Predictor — Augur.edu" },
+      { title: "Nigerian University Course Predictor — Augur.edu" },
       {
         name: "description",
         content:
-          "Predict the LASU course you can study based on your JAMB score, Post-UTME, and O'Level grades. Download a full PDF report.",
+          "Pick any Nigerian university (LASU, UNILAG, UI, OAU, UNN, ABU and more) and predict the course you can study from your JAMB, Post-UTME and O'Level. Download a full PDF report.",
       },
-      { property: "og:title", content: "LASU Course Predictor" },
+      { property: "og:title", content: "Nigerian University Course Predictor" },
       {
         property: "og:description",
-        content: "Know your LASU admission chances before you apply.",
+        content: "Predict your admission chances at any Nigerian university.",
       },
     ],
   }),
@@ -55,11 +57,12 @@ const DEFAULT_GRADES: OLevelGrade[] = ["B3", "B3", "C4", "C4", "C5"];
 const O_LEVEL_LABELS = ["English Language", "Mathematics", "Subject 3", "Subject 4", "Subject 5"];
 
 const DEFAULTS: PredictorInput = {
+  universityId: "lasu",
   jambScore: 220,
   postUtmeScore: 65,
   oLevelGrades: DEFAULT_GRADES,
   subjectCombo: "science",
-  state: "lagos",
+  isIndigene: true,
   interests: ["tech", "science"],
 };
 
@@ -131,6 +134,8 @@ function PredictorPage() {
   };
 
 
+  const uni = getUniversity(input.universityId);
+
   return (
     <div className="bg-grid min-h-screen">
       <SiteHeader />
@@ -139,20 +144,47 @@ function PredictorPage() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3 w-3 text-primary" />
-            Lagos State University — JAMB course predictor
+            Nigerian universities — JAMB course predictor
           </div>
           <h1 className="font-display text-4xl font-semibold md:text-5xl">
-            What can I study at <span className="text-gradient">LASU</span>?
+            What can I study at <span className="text-gradient">{uni.shortName}</span>?
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Enter your JAMB score, Post-UTME and O'Level results. We'll match you with
-            LASU courses you actually have a shot at — and you can download the full
-            breakdown as a PDF.
+            Pick your target university, then enter your JAMB, Post-UTME and O'Level.
+            We'll match you with courses you actually have a shot at — and you can
+            download the full breakdown as a PDF.
           </p>
         </div>
 
         {/* Form */}
         <div className="mt-12 glass rounded-3xl p-8 md:p-10">
+          {/* University selector */}
+          <div className="mb-8">
+            <label className="text-sm font-medium text-muted-foreground">
+              Target university
+            </label>
+            <select
+              value={input.universityId}
+              onChange={(e) => update("universityId", e.target.value)}
+              className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground focus:border-primary focus:outline-none"
+            >
+              {(["Federal", "State", "Private"] as const).map((group) => (
+                <optgroup key={group} label={`${group} universities`}>
+                  {UNIVERSITIES.filter((u) => u.type === group).map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.shortName}) — {u.state}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {uni.shortName} screening: {uni.formula.jamb}% JAMB + {uni.formula.postUtme}% Post-UTME
+              {uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : " (O'Level eligibility only)"}
+              {uni.indigeneBonus > 0 ? ` • ${uni.state} indigene bonus ~${uni.indigeneBonus} marks` : ""}
+            </p>
+          </div>
+
           <div className="grid gap-7 md:grid-cols-2">
             <SliderField
               label="JAMB UTME score"
@@ -223,23 +255,21 @@ function PredictorPage() {
             </div>
           </div>
 
-          {/* State */}
+          {/* Indigene */}
           <div className="mt-8">
             <label className="text-sm font-medium text-muted-foreground">
-              State of origin
+              Are you an indigene of {uni.state} State?
             </label>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {(
-                [
-                  { id: "lagos" as const, label: "Lagos State (Indigene)" },
-                  { id: "other" as const, label: "Other state" },
-                ]
-              ).map((t) => (
+              {[
+                { id: true, label: `Yes — ${uni.state} indigene` },
+                { id: false, label: "No / other state" },
+              ].map((t) => (
                 <button
-                  key={t.id}
-                  onClick={() => update("state", t.id)}
+                  key={String(t.id)}
+                  onClick={() => update("isIndigene", t.id)}
                   className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
-                    input.state === t.id
+                    input.isIndigene === t.id
                       ? "border-primary bg-primary/15 text-foreground glow-primary"
                       : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                   }`}
@@ -248,6 +278,12 @@ function PredictorPage() {
                 </button>
               ))}
             </div>
+            {uni.indigeneBonus === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {uni.shortName} ({uni.type}) does not apply an indigene bonus — the toggle
+                won't affect your score.
+              </p>
+            )}
           </div>
 
           {/* Interests */}
@@ -282,7 +318,7 @@ function PredictorPage() {
               className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground transition-all hover:glow-primary"
             >
               <Sparkles className="h-4 w-4" />
-              Predict my LASU course
+              Predict my {uni.shortName} course
             </button>
             <button
               onClick={reset}
@@ -293,6 +329,7 @@ function PredictorPage() {
             </button>
           </div>
         </div>
+
 
         {/* Result */}
         {result && (
@@ -372,7 +409,7 @@ function ResultPanel({
     <div id="result" className="mt-16 scroll-mt-20 space-y-6">
       <div className="text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
-          Your LASU forecast
+          Your {result.universityName} forecast
         </div>
         <h2 className="mt-3 font-display text-4xl font-semibold md:text-5xl">
           Here's where you'll likely <span className="text-gradient">land</span>.
@@ -457,8 +494,7 @@ function ResultPanel({
       <div className="glass rounded-3xl p-8">
         <h3 className="font-display text-xl font-semibold">Predictor breakdown</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          How LASU's screening formula composes your aggregate score (50% JAMB + 30%
-          Post-UTME + 20% O'Level, with indigene adjustment).
+          How {result.universityName}'s screening formula composes your aggregate score.
         </p>
         <div className="mt-6 space-y-4">
           {result.breakdown.map((b) => (
@@ -489,7 +525,7 @@ function ResultPanel({
       {/* Top courses */}
       <div className="glass rounded-3xl p-8">
         <h3 className="font-display text-xl font-semibold">
-          Top {result.topCourses.length} recommended LASU courses
+          Top {result.topCourses.length} recommended courses at {result.universityName}
         </h3>
         <div className="mt-5 space-y-3">
           {result.topCourses.map((c) => (
@@ -582,9 +618,9 @@ function ResultPanel({
       </div>
 
       <p className="pt-2 text-center text-xs text-muted-foreground">
-        Estimates are based on recent LASU JAMB departmental cutoffs and the
-        50/30/20 screening formula. Always confirm with the official LASU
-        admissions brochure for the current year.
+        Estimates use recent JAMB departmental cutoffs at {result.universityName} and
+        its screening formula. Always confirm with the official brochure for the
+        current admission year.
       </p>
     </div>
   );
@@ -728,18 +764,22 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text("LASU Course Predictor", margin, 50);
+  doc.text(`${result.universityName} — Course Predictor`, margin, 50);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text("Personalised JAMB / Admission Report — Augur.edu", margin, 70);
   y = 120;
 
   // ========== INPUT SUMMARY ==========
+  const uni = getUniversity(input.universityId);
   heading("Your Profile", 16);
+  body(`University: ${uni.name} (${uni.shortName}) — ${uni.type}, ${uni.state} State`);
   body(`JAMB UTME Score: ${input.jambScore} / 400`);
   body(`Post-UTME / Screening Score: ${input.postUtmeScore} / 100`);
   body(`Subject Combination: ${input.subjectCombo.toUpperCase()}`);
-  body(`State of Origin: ${input.state === "lagos" ? "Lagos State (Indigene)" : "Non-indigene"}`);
+  body(
+    `Indigene status: ${input.isIndigene ? `${uni.state} State indigene` : "Non-indigene"}`,
+  );
   body(`O'Level Grades: ${input.oLevelGrades.join(", ")}  (${result.oLevelPoints}/30 grade points)`);
   body(`Interests: ${input.interests.join(", ") || "None selected"}`);
   y += 6;
@@ -754,7 +794,7 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
   doc.text(`${result.aggregateScore} / 100`, margin, y + 30);
   y += 44;
   body(
-    "LASU computes admission using a weighted formula: 50% JAMB + 30% Post-UTME + 20% O'Level. Lagos State indigenes typically benefit from cutoffs ~8 marks lower.",
+    `${uni.shortName} computes admission using a weighted formula: ${uni.formula.jamb}% JAMB + ${uni.formula.postUtme}% Post-UTME${uni.formula.oLevel > 0 ? ` + ${uni.formula.oLevel}% O'Level` : ""}.${uni.indigeneBonus > 0 ? ` ${uni.state} State indigenes typically benefit from cutoffs ~${uni.indigeneBonus} marks lower.` : ""}`,
   );
   y += 4;
   divider();
@@ -819,12 +859,12 @@ function generatePdf(input: PredictorInput, result: PredictorResult) {
     doc.setFontSize(8);
     doc.setTextColor(140, 140, 160);
     doc.text(
-      "Estimates based on recent LASU JAMB cutoffs. Confirm with the official LASU brochure for the current admission year.",
+      `Estimates based on recent ${uni.shortName} JAMB cutoffs. Confirm with the official ${uni.shortName} brochure for the current admission year.`,
       margin,
       pageH - 24,
     );
     doc.text(`Page ${i} of ${pageCount}`, pageW - margin - 60, pageH - 24);
   }
 
-  doc.save(`LASU-Course-Prediction-${input.jambScore}.pdf`);
+  doc.save(`${uni.shortName}-Course-Prediction-${input.jambScore}.pdf`);
 }
