@@ -102,6 +102,35 @@ function PredictorPage() {
     generatePdf(input, result);
   };
 
+  const { user } = useAuth();
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
+
+  const savePrediction = async () => {
+    if (!result || !user) return;
+    setSaveState("saving");
+    const top = result.topCourses[0];
+    const { error } = await supabase.from("predictions").insert({
+      user_id: user.id,
+      label: top ? `${top.course} (JAMB ${input.jambScore})` : `JAMB ${input.jambScore}`,
+      input: input as never,
+      result: result as never,
+      jamb_score: input.jambScore,
+      aggregate_score: result.aggregateScore,
+      top_course: top?.course ?? null,
+      top_course_chance: top?.admissionChance ?? null,
+    });
+    if (error) {
+      console.error(error);
+      setSaveState("error");
+    } else {
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 3000);
+    }
+  };
+
+
   return (
     <div className="bg-grid min-h-screen">
       <SiteHeader />
