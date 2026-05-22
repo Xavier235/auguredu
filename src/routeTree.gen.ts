@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -16,6 +17,11 @@ import { Route as CgpaRouteImport } from './routes/cgpa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
+const StudyPlanRoute = StudyPlanRouteImport.update({
+  id: '/study-plan',
+  path: '/study-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/study-plan': typeof StudyPlanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/study-plan': typeof StudyPlanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/study-plan': typeof StudyPlanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,8 +90,16 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/predictor'
     | '/profile'
+    | '/study-plan'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/cgpa' | '/how-it-works' | '/predictor' | '/profile'
+  to:
+    | '/'
+    | '/auth'
+    | '/cgpa'
+    | '/how-it-works'
+    | '/predictor'
+    | '/profile'
+    | '/study-plan'
   id:
     | '__root__'
     | '/'
@@ -91,6 +108,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/predictor'
     | '/profile'
+    | '/study-plan'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,10 +118,18 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
+  StudyPlanRoute: typeof StudyPlanRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/study-plan': {
+      id: '/study-plan'
+      path: '/study-plan'
+      fullPath: '/study-plan'
+      preLoaderRoute: typeof StudyPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -156,7 +182,18 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
+  StudyPlanRoute: StudyPlanRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
