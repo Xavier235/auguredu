@@ -102,23 +102,23 @@ function Home() {
             {[
               {
                 icon: GraduationCap,
-                title: "JAMB → LASU admission",
-                body: "Haven't entered school yet? Plug in your JAMB, Post-UTME and O'Level — see exactly which LASU courses you'll get in for.",
+                title: "JAMB admission predictor",
+                body: "Haven't entered school yet? Plug in your JAMB, Post-UTME and O'Level — see which courses you'll get in for at any Nigerian university.",
                 to: "/predictor",
                 cta: "Run admission predictor",
               },
               {
                 icon: ChartLine,
-                title: "CGPA forecast",
-                body: "Already a LASU student? Project your next semester GPA and end-of-degree CGPA from your current courses and expected grades.",
+                title: "CGPA forecaster",
+                body: "Already in university? Enter your CA and exam scores — get accurate semester GPA and projected CGPA on the 5.0 scale.",
                 to: "/cgpa",
                 cta: "Forecast my CGPA",
               },
               {
                 icon: Compass,
                 title: "Personal study workflow",
-                body: "Get a weekly study plan tuned to your target CGPA, attendance, sleep and current study hours — no fluff.",
-                to: "/cgpa",
+                body: "A weekly plan tuned to your target CGPA, sleep and attendance — with streaks and rewards for every day you show up.",
+                to: "/study-plan",
                 cta: "Build my study plan",
               },
             ].map((f, i) => (

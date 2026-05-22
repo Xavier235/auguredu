@@ -255,36 +255,35 @@ function PredictorPage() {
             </div>
           </div>
 
-          {/* Indigene */}
-          <div className="mt-8">
-            <label className="text-sm font-medium text-muted-foreground">
-              Are you an indigene of {uni.state} State?
-            </label>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {[
-                { id: true, label: `Yes — ${uni.state} indigene` },
-                { id: false, label: "No / other state" },
-              ].map((t) => (
-                <button
-                  key={String(t.id)}
-                  onClick={() => update("isIndigene", t.id)}
-                  className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
-                    input.isIndigene === t.id
-                      ? "border-primary bg-primary/15 text-foreground glow-primary"
-                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+          {/* Indigene — only shown when the selected uni has a bonus */}
+          {uni.indigeneBonus > 0 && (
+            <div className="mt-8">
+              <label className="text-sm font-medium text-muted-foreground">
+                Are you an indigene of {uni.state} State?{" "}
+                <span className="text-xs text-primary">
+                  (+{uni.indigeneBonus} bonus marks for indigenes)
+                </span>
+              </label>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {[
+                  { id: true, label: `Yes — ${uni.state} indigene` },
+                  { id: false, label: "No / other state" },
+                ].map((t) => (
+                  <button
+                    key={String(t.id)}
+                    onClick={() => update("isIndigene", t.id)}
+                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                      input.isIndigene === t.id
+                        ? "border-primary bg-primary/15 text-foreground glow-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            {uni.indigeneBonus === 0 && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {uni.shortName} ({uni.type}) does not apply an indigene bonus — the toggle
-                won't affect your score.
-              </p>
-            )}
-          </div>
+          )}
 
           {/* Interests */}
           <div className="mt-8">
