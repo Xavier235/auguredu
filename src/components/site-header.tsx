@@ -8,8 +8,9 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const links = [
     { to: "/", label: "Home" },
-    { to: "/predictor", label: "JAMB → LASU" },
-    { to: "/cgpa", label: "CGPA & Study Plan" },
+    { to: "/predictor", label: "JAMB Predictor" },
+    { to: "/cgpa", label: "CGPA" },
+    { to: "/study-plan", label: "Study Plan" },
     ...(user ? [{ to: "/profile", label: "My profile" }] : []),
     { to: "/how-it-works", label: "How it works" },
   ];
