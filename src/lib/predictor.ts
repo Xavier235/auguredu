@@ -44,17 +44,19 @@ export type PredictorResult = {
 };
 
 // ─── Universities ────────────────────────────────────────────────
+// To add a new university: append an entry to UNIVERSITIES below.
+// The predictor automatically picks it up — no other files need to change.
 export type University = {
   id: string;
   name: string;
   shortName: string;
   type: "Federal" | "State" | "Private";
   state: string;
-  // Screening: weights for [JAMB, Post-UTME, O'Level] (must sum to 100)
+  // Screening weights (must sum to 100)
   formula: { jamb: number; postUtme: number; oLevel: number };
-  // Competitiveness adjustment added to every base cutoff (e.g. UI/UNILAG +15, FUNAAB -5)
+  // Competitiveness adjustment added to every base cutoff
   competitivenessMod: number;
-  // Bonus JAMB marks given to host-state indigenes (state unis usually have one)
+  // Bonus JAMB marks given to host-state indigenes
   indigeneBonus: number;
   // General minimum JAMB cutoff this uni accepts
   generalCutoff: number;
@@ -62,174 +64,51 @@ export type University = {
 };
 
 export const UNIVERSITIES: University[] = [
-  {
-    id: "lasu",
-    name: "Lagos State University",
-    shortName: "LASU",
-    type: "State",
-    state: "Lagos",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 0,
-    indigeneBonus: 8,
-    generalCutoff: 180,
-  },
-  {
-    id: "unilag",
-    name: "University of Lagos",
-    shortName: "UNILAG",
-    type: "Federal",
-    state: "Lagos",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 15,
-    indigeneBonus: 0,
-    generalCutoff: 200,
-  },
-  {
-    id: "ui",
-    name: "University of Ibadan",
-    shortName: "UI",
-    type: "Federal",
-    state: "Oyo",
-    formula: { jamb: 60, postUtme: 40, oLevel: 0 },
-    competitivenessMod: 20,
-    indigeneBonus: 0,
-    generalCutoff: 200,
-    notes: "UI screening: 60% JAMB + 40% Post-UTME (O'Level used only for eligibility).",
-  },
-  {
-    id: "oau",
-    name: "Obafemi Awolowo University",
-    shortName: "OAU",
-    type: "Federal",
-    state: "Osun",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 10,
-    indigeneBonus: 0,
-    generalCutoff: 200,
-  },
-  {
-    id: "unn",
-    name: "University of Nigeria, Nsukka",
-    shortName: "UNN",
-    type: "Federal",
-    state: "Enugu",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 8,
-    indigeneBonus: 0,
-    generalCutoff: 200,
-  },
-  {
-    id: "unilorin",
-    name: "University of Ilorin",
-    shortName: "UNILORIN",
-    type: "Federal",
-    state: "Kwara",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 5,
-    indigeneBonus: 0,
-    generalCutoff: 180,
-  },
-  {
-    id: "uniben",
-    name: "University of Benin",
-    shortName: "UNIBEN",
-    type: "Federal",
-    state: "Edo",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 8,
-    indigeneBonus: 0,
-    generalCutoff: 200,
-  },
-  {
-    id: "uniabuja",
-    name: "University of Abuja",
-    shortName: "UNIABUJA",
-    type: "Federal",
-    state: "FCT",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: -5,
-    indigeneBonus: 5,
-    generalCutoff: 180,
-  },
-  {
-    id: "abu",
-    name: "Ahmadu Bello University",
-    shortName: "ABU",
-    type: "Federal",
-    state: "Kaduna",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 5,
-    indigeneBonus: 0,
-    generalCutoff: 180,
-  },
-  {
-    id: "futa",
-    name: "Federal University of Technology, Akure",
-    shortName: "FUTA",
-    type: "Federal",
-    state: "Ondo",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 0,
-    indigeneBonus: 0,
-    generalCutoff: 180,
-    notes: "Tech-focused: best fit for Engineering, Sciences and Tech.",
-  },
-  {
-    id: "funaab",
-    name: "Federal University of Agriculture, Abeokuta",
-    shortName: "FUNAAB",
-    type: "Federal",
-    state: "Ogun",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: -5,
-    indigeneBonus: 0,
-    generalCutoff: 180,
-  },
-  {
-    id: "oou",
-    name: "Olabisi Onabanjo University",
-    shortName: "OOU",
-    type: "State",
-    state: "Ogun",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: -5,
-    indigeneBonus: 8,
-    generalCutoff: 180,
-  },
-  {
-    id: "ekiti",
-    name: "Ekiti State University",
-    shortName: "EKSU",
-    type: "State",
-    state: "Ekiti",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: -10,
-    indigeneBonus: 8,
-    generalCutoff: 160,
-  },
-  {
-    id: "covenant",
-    name: "Covenant University",
-    shortName: "Covenant",
-    type: "Private",
-    state: "Ogun",
-    formula: { jamb: 50, postUtme: 30, oLevel: 20 },
-    competitivenessMod: 5,
-    indigeneBonus: 0,
-    generalCutoff: 180,
-    notes: "Private — no indigene bias; weight on Post-UTME and character screening.",
-  },
-  {
-    id: "babcock",
-    name: "Babcock University",
-    shortName: "Babcock",
-    type: "Private",
-    state: "Ogun",
-    formula: { jamb: 60, postUtme: 20, oLevel: 20 },
-    competitivenessMod: -5,
-    indigeneBonus: 0,
-    generalCutoff: 160,
-  },
+  // ── Federal ──────────────────────────────────────────────
+  { id: "unilag", name: "University of Lagos", shortName: "UNILAG", type: "Federal", state: "Lagos", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 15, indigeneBonus: 0, generalCutoff: 200 },
+  { id: "ui", name: "University of Ibadan", shortName: "UI", type: "Federal", state: "Oyo", formula: { jamb: 60, postUtme: 40, oLevel: 0 }, competitivenessMod: 20, indigeneBonus: 0, generalCutoff: 200, notes: "UI: 60% JAMB + 40% Post-UTME (O'Level for eligibility only)." },
+  { id: "oau", name: "Obafemi Awolowo University", shortName: "OAU", type: "Federal", state: "Osun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 10, indigeneBonus: 0, generalCutoff: 200 },
+  { id: "unn", name: "University of Nigeria, Nsukka", shortName: "UNN", type: "Federal", state: "Enugu", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 8, indigeneBonus: 0, generalCutoff: 200 },
+  { id: "unilorin", name: "University of Ilorin", shortName: "UNILORIN", type: "Federal", state: "Kwara", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 5, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "uniben", name: "University of Benin", shortName: "UNIBEN", type: "Federal", state: "Edo", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 8, indigeneBonus: 0, generalCutoff: 200 },
+  { id: "uniabuja", name: "University of Abuja", shortName: "UNIABUJA", type: "Federal", state: "FCT", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 5, generalCutoff: 180 },
+  { id: "abu", name: "Ahmadu Bello University", shortName: "ABU", type: "Federal", state: "Kaduna", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 5, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "futa", name: "Federal University of Technology, Akure", shortName: "FUTA", type: "Federal", state: "Ondo", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180, notes: "Tech-focused: Engineering, Sciences, Tech." },
+  { id: "funaab", name: "Federal University of Agriculture, Abeokuta", shortName: "FUNAAB", type: "Federal", state: "Ogun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "futminna", name: "Federal University of Technology, Minna", shortName: "FUTMinna", type: "Federal", state: "Niger", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 170 },
+  { id: "futo", name: "Federal University of Technology, Owerri", shortName: "FUTO", type: "Federal", state: "Imo", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "uniport", name: "University of Port Harcourt", shortName: "UNIPORT", type: "Federal", state: "Rivers", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 5, indigeneBonus: 0, generalCutoff: 200 },
+  { id: "unical", name: "University of Calabar", shortName: "UNICAL", type: "Federal", state: "Cross River", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "uniuyo", name: "University of Uyo", shortName: "UNIUYO", type: "Federal", state: "Akwa Ibom", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "unijos", name: "University of Jos", shortName: "UNIJOS", type: "Federal", state: "Plateau", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "unimaid", name: "University of Maiduguri", shortName: "UNIMAID", type: "Federal", state: "Borno", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 170 },
+  { id: "buk", name: "Bayero University, Kano", shortName: "BUK", type: "Federal", state: "Kano", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "udus", name: "Usmanu Danfodiyo University, Sokoto", shortName: "UDUS", type: "Federal", state: "Sokoto", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 170 },
+  { id: "fulafia", name: "Federal University, Lafia", shortName: "FULafia", type: "Federal", state: "Nasarawa", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 0, generalCutoff: 160 },
+  { id: "fuoye", name: "Federal University, Oye-Ekiti", shortName: "FUOYE", type: "Federal", state: "Ekiti", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 0, generalCutoff: 160 },
+
+  // ── State ────────────────────────────────────────────────
+  { id: "lasu", name: "Lagos State University", shortName: "LASU", type: "State", state: "Lagos", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 8, generalCutoff: 180 },
+  { id: "oou", name: "Olabisi Onabanjo University", shortName: "OOU", type: "State", state: "Ogun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 8, generalCutoff: 180 },
+  { id: "eksu", name: "Ekiti State University", shortName: "EKSU", type: "State", state: "Ekiti", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 8, generalCutoff: 160 },
+  { id: "lautech", name: "Ladoke Akintola University of Technology", shortName: "LAUTECH", type: "State", state: "Oyo", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 5, generalCutoff: 180 },
+  { id: "ksu", name: "Kogi State University, Anyigba", shortName: "KSU", type: "State", state: "Kogi", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 8, generalCutoff: 160 },
+  { id: "delsu", name: "Delta State University, Abraka", shortName: "DELSU", type: "State", state: "Delta", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 8, generalCutoff: 170 },
+  { id: "rsu", name: "Rivers State University", shortName: "RSU", type: "State", state: "Rivers", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 8, generalCutoff: 170 },
+  { id: "imsu", name: "Imo State University", shortName: "IMSU", type: "State", state: "Imo", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 8, generalCutoff: 170 },
+  { id: "absu", name: "Abia State University, Uturu", shortName: "ABSU", type: "State", state: "Abia", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 8, generalCutoff: 160 },
+  { id: "ebsu", name: "Ebonyi State University", shortName: "EBSU", type: "State", state: "Ebonyi", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 8, generalCutoff: 160 },
+  { id: "kasu", name: "Kaduna State University", shortName: "KASU", type: "State", state: "Kaduna", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 8, generalCutoff: 160 },
+
+  // ── Private ──────────────────────────────────────────────
+  { id: "covenant", name: "Covenant University", shortName: "Covenant", type: "Private", state: "Ogun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 5, indigeneBonus: 0, generalCutoff: 180, notes: "Private — no indigene bias." },
+  { id: "babcock", name: "Babcock University", shortName: "Babcock", type: "Private", state: "Ogun", formula: { jamb: 60, postUtme: 20, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 160 },
+  { id: "redeemers", name: "Redeemer's University", shortName: "RUN", type: "Private", state: "Osun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 160 },
+  { id: "abuad", name: "Afe Babalola University, Ado-Ekiti", shortName: "ABUAD", type: "Private", state: "Ekiti", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 0, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "pau", name: "Pan-Atlantic University", shortName: "PAU", type: "Private", state: "Lagos", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: 5, indigeneBonus: 0, generalCutoff: 180 },
+  { id: "bowen", name: "Bowen University", shortName: "Bowen", type: "Private", state: "Osun", formula: { jamb: 50, postUtme: 30, oLevel: 20 }, competitivenessMod: -5, indigeneBonus: 0, generalCutoff: 160 },
+  { id: "lcu", name: "Lead City University", shortName: "LCU", type: "Private", state: "Oyo", formula: { jamb: 60, postUtme: 20, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 0, generalCutoff: 150 },
+  { id: "caleb", name: "Caleb University", shortName: "Caleb", type: "Private", state: "Lagos", formula: { jamb: 60, postUtme: 20, oLevel: 20 }, competitivenessMod: -10, indigeneBonus: 0, generalCutoff: 150 },
 ];
 
 export const getUniversity = (id: string): University =>
