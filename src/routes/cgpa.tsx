@@ -116,6 +116,18 @@ function CgpaPage() {
     setCourses(next);
   }
 
+  function addCustomCourse() {
+    const code = customCode.trim().toUpperCase() || "EXT 101";
+    if (selectedCodes.has(code)) return;
+    setCourses((cs) => [
+      ...cs,
+      { code, units: Math.max(1, Math.min(6, customUnits)), caScore: 20, examScore: 45 },
+    ]);
+    setCustomCode("");
+    setCustomUnits(3);
+    setShowCustomAdd(false);
+  }
+
 
   return (
     <div className="bg-grid min-h-screen">
