@@ -73,6 +73,11 @@ function CgpaPage() {
     newCourse(4),
   ]);
 
+  // Custom/external course adder
+  const [showCustomAdd, setShowCustomAdd] = useState(false);
+  const [customCode, setCustomCode] = useState("");
+  const [customUnits, setCustomUnits] = useState(3);
+
   const catalogue = useMemo(
     () => coursesFor(departmentId, level),
     [departmentId, level],
@@ -109,6 +114,18 @@ function CgpaPage() {
       examScore: 45,
     }));
     setCourses(next);
+  }
+
+  function addCustomCourse() {
+    const code = customCode.trim().toUpperCase() || "EXT 101";
+    if (selectedCodes.has(code)) return;
+    setCourses((cs) => [
+      ...cs,
+      { code, units: Math.max(1, Math.min(6, customUnits)), caScore: 20, examScore: 45 },
+    ]);
+    setCustomCode("");
+    setCustomUnits(3);
+    setShowCustomAdd(false);
   }
 
 
@@ -288,18 +305,69 @@ function CgpaPage() {
         <section className="grid gap-6 lg:grid-cols-5">
 
           <div className="glass space-y-4 rounded-3xl p-6 lg:col-span-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <GraduationCap className="h-4 w-4 text-primary" /> This
                 semester's courses
               </div>
-              <button
-                onClick={() => setCourses((cs) => [...cs, newCourse(cs.length + 1)])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium hover:bg-accent/20"
-              >
-                <Plus className="h-3.5 w-3.5" /> Add course
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowCustomAdd((s) => !s)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add external course
+                </button>
+                <button
+                  onClick={() => setCourses((cs) => [...cs, newCourse(cs.length + 1)])}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium hover:bg-accent/20"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add course
+                </button>
+              </div>
             </div>
+
+            {/* Custom add inline form */}
+            {showCustomAdd && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="text-xs font-semibold text-primary">Add an external / elective course</div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <label className="block">
+                    <span className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">Course code</span>
+                    <input
+                      value={customCode}
+                      onChange={(e) => setCustomCode(e.target.value)}
+                      placeholder="e.g. ELT 312, GST 107"
+                      className="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">Units</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={6}
+                      value={customUnits}
+                      onChange={(e) => setCustomUnits(Number(e.target.value))}
+                      className="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                  </label>
+                  <div className="flex items-end gap-2">
+                    <button
+                      onClick={addCustomCourse}
+                      className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add to list
+                    </button>
+                    <button
+                      onClick={() => setShowCustomAdd(false)}
+                      className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Header row */}
             <div className="grid grid-cols-12 gap-2 px-2 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
