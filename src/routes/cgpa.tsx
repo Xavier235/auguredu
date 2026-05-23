@@ -73,6 +73,11 @@ function CgpaPage() {
     newCourse(4),
   ]);
 
+  // Custom/external course adder
+  const [showCustomAdd, setShowCustomAdd] = useState(false);
+  const [customCode, setCustomCode] = useState("");
+  const [customUnits, setCustomUnits] = useState(3);
+
   const catalogue = useMemo(
     () => coursesFor(departmentId, level),
     [departmentId, level],
