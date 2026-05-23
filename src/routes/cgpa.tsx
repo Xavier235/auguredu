@@ -12,12 +12,20 @@ import {
   type LetterGrade,
 } from "@/lib/cgpa";
 import {
+  DEPARTMENTS,
+  LEVELS,
+  coursesFor,
+  type AcademicLevel,
+} from "@/lib/course-catalogue";
+import {
   GraduationCap,
   Plus,
   Trash2,
   ArrowRight,
   IdCard,
+  BookOpen,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/cgpa")({
   head: () => ({
@@ -51,6 +59,10 @@ function CgpaPage() {
   const [studentId, setStudentId] = useState("RUN/CMP/21/1001");
   const [gender, setGender] = useState<"M" | "F">("M");
 
+  // Department + level for the course catalogue picker
+  const [departmentId, setDepartmentId] = useState<string>("csc");
+  const [level, setLevel] = useState<AcademicLevel>("200");
+
   // CGPA forecaster state
   const [currentCgpa, setCurrentCgpa] = useState(3.2);
   const [unitsCompleted, setUnitsCompleted] = useState(60);
@@ -60,6 +72,15 @@ function CgpaPage() {
     newCourse(3),
     newCourse(4),
   ]);
+
+  const catalogue = useMemo(
+    () => coursesFor(departmentId, level),
+    [departmentId, level],
+  );
+  const selectedCodes = useMemo(
+    () => new Set(courses.map((c) => c.code.trim().toUpperCase())),
+    [courses],
+  );
 
   const result = useMemo(
     () =>
@@ -74,6 +95,22 @@ function CgpaPage() {
   function updateCourse(idx: number, patch: Partial<CourseLoad>) {
     setCourses((cs) => cs.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
   }
+
+  function addFromCatalogue(code: string, units: number) {
+    if (selectedCodes.has(code.toUpperCase())) return;
+    setCourses((cs) => [...cs, { code, units, caScore: 20, examScore: 45 }]);
+  }
+
+  function loadAllForLevel() {
+    const next: CourseLoad[] = catalogue.map((c) => ({
+      code: c.code,
+      units: c.units,
+      caScore: 20,
+      examScore: 45,
+    }));
+    setCourses(next);
+  }
+
 
   return (
     <div className="bg-grid min-h-screen">
