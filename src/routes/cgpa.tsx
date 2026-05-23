@@ -284,22 +284,257 @@ function CgpaPage() {
           </p>
         </section>
 
+  const [showCustomAdd, setShowCustomAdd] = useState(false);
+  const [customCode, setCustomCode] = useState("");
+  const [customUnits, setCustomUnits] = useState(3);
+
+  function addCustomCourse() {
+    const code = customCode.trim().toUpperCase() || "EXT 101";
+    if (selectedCodes.has(code)) return;
+    setCourses((cs) => [
+      ...cs,
+      { code, units: Math.max(1, Math.min(6, customUnits)), caScore: 20, examScore: 45 },
+    ]);
+    setCustomCode("");
+    setCustomUnits(3);
+    setShowCustomAdd(false);
+  }
+
+  return (
+    <div className="bg-grid min-h-screen">
+      <SiteHeader />
+
+      <main className="mx-auto max-w-7xl px-6 pb-20 pt-12">
+        <header className="mb-10 max-w-3xl">
+          <div className="text-xs font-medium uppercase tracking-widest text-primary">
+            For students already in university
+          </div>
+          <h1 className="mt-3 font-display text-4xl font-semibold md:text-6xl">
+            CGPA <span className="text-gradient">forecaster</span>.
+          </h1>
+          <p className="mt-5 text-lg text-muted-foreground">
+            Enter each course's <strong>CA score (out of 30)</strong> and{" "}
+            <strong>Exam score (out of 70)</strong>. We compute totals, derive
+            letter grades, then project your semester GPA and end-of-year CGPA
+            on the standard 5.0 scale.
+          </p>
+          <div className="mt-5">
+            <Link
+              to="/study-plan"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Build a personal study workflow → <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </header>
+
+        {/* Student context */}
+        <section className="glass mb-6 rounded-3xl p-6">
+          <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+            <IdCard className="h-4 w-4 text-primary" /> Student details (for your report)
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <TextField
+              label="Student ID"
+              value={studentId}
+              onChange={setStudentId}
+              placeholder="RUN/CMP/21/1001"
+            />
+            <div>
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Gender
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {(["M", "F"] as const).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGender(g)}
+                    className={`rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                      gender === g
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {g === "M" ? "Male" : "Female"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <NumberField
+              label="Current CGPA (out of 5.0)"
+              value={currentCgpa}
+              onChange={setCurrentCgpa}
+              step={0.01}
+              min={0}
+              max={5}
+            />
+          </div>
+          <div className="mt-4">
+            <NumberField
+              label="Units already completed"
+              value={unitsCompleted}
+              onChange={setUnitsCompleted}
+              step={1}
+              min={0}
+              max={300}
+            />
+          </div>
+        </section>
+
+        {/* Course catalogue picker */}
+        <section className="glass mb-6 rounded-3xl p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <BookOpen className="h-4 w-4 text-primary" /> Pick courses from your department
+            </div>
+            <button
+              onClick={loadAllForLevel}
+              className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+            >
+              Load all {level}L courses
+            </button>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Department
+              </span>
+              <select
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+                className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                {DEPARTMENTS.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} — {d.faculty}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Level
+              </span>
+              <select
+                value={level}
+                onChange={(e) => setLevel(e.target.value as AcademicLevel)}
+                className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                {LEVELS.map((l) => (
+                  <option key={l} value={l}>
+                    {l} Level
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {catalogue.length === 0 && (
+              <p className="col-span-full text-xs text-muted-foreground">
+                No courses listed yet for this department/level. Add one manually below
+                or pick a different level.
+              </p>
+            )}
+            {catalogue.map((c) => {
+              const added = selectedCodes.has(c.code.toUpperCase());
+              return (
+                <button
+                  key={c.code + c.department}
+                  onClick={() => addFromCatalogue(c.code, c.units)}
+                  disabled={added}
+                  className={`flex items-start justify-between gap-2 rounded-xl border p-3 text-left text-xs transition-all ${
+                    added
+                      ? "border-primary/40 bg-primary/10 text-muted-foreground"
+                      : "border-border/60 bg-surface/40 hover:border-primary/50 hover:bg-surface/70"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-semibold text-foreground">{c.code}</div>
+                    <div className="truncate text-muted-foreground">{c.title}</div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {c.units}u
+                    </div>
+                    <div className={`text-[10px] font-medium ${added ? "text-primary" : "text-muted-foreground"}`}>
+                      {added ? "Added" : "+ Add"}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         {/* Forecaster */}
         <section className="grid gap-6 lg:grid-cols-5">
 
           <div className="glass space-y-4 rounded-3xl p-6 lg:col-span-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <GraduationCap className="h-4 w-4 text-primary" /> This
                 semester's courses
               </div>
-              <button
-                onClick={() => setCourses((cs) => [...cs, newCourse(cs.length + 1)])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium hover:bg-accent/20"
-              >
-                <Plus className="h-3.5 w-3.5" /> Add course
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowCustomAdd((s) => !s)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add external course
+                </button>
+                <button
+                  onClick={() => setCourses((cs) => [...cs, newCourse(cs.length + 1)])}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs font-medium hover:bg-accent/20"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add course
+                </button>
+              </div>
             </div>
+
+            {/* Custom add inline form */}
+            {showCustomAdd && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="text-xs font-semibold text-primary">Add an external / elective course</div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <label className="block">
+                    <span className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">Course code</span>
+                    <input
+                      value={customCode}
+                      onChange={(e) => setCustomCode(e.target.value)}
+                      placeholder="e.g. ELT 312, GST 107"
+                      className="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">Units</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={6}
+                      value={customUnits}
+                      onChange={(e) => setCustomUnits(Number(e.target.value))}
+                      className="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                  </label>
+                  <div className="flex items-end gap-2">
+                    <button
+                      onClick={addCustomCourse}
+                      className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add to list
+                    </button>
+                    <button
+                      onClick={() => setShowCustomAdd(false)}
+                      className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Header row */}
             <div className="grid grid-cols-12 gap-2 px-2 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
@@ -310,6 +545,7 @@ function CgpaPage() {
               <div className="col-span-2 text-center">Total → Grade</div>
               <div className="col-span-1" />
             </div>
+
 
             <div className="space-y-2">
               {courses.map((c, i) => {
