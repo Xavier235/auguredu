@@ -193,8 +193,100 @@ function CgpaPage() {
           </div>
         </section>
 
+        {/* Course catalogue picker */}
+        <section className="glass mb-6 rounded-3xl p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <BookOpen className="h-4 w-4 text-primary" /> Pick courses from your department
+            </div>
+            <button
+              onClick={loadAllForLevel}
+              className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+            >
+              Load all {level}L courses
+            </button>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Department
+              </span>
+              <select
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+                className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                {DEPARTMENTS.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} — {d.faculty}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Level
+              </span>
+              <select
+                value={level}
+                onChange={(e) => setLevel(e.target.value as AcademicLevel)}
+                className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                {LEVELS.map((l) => (
+                  <option key={l} value={l}>
+                    {l} Level
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {catalogue.length === 0 && (
+              <p className="col-span-full text-xs text-muted-foreground">
+                No courses listed yet for this department/level. Add one manually below
+                or pick a different level.
+              </p>
+            )}
+            {catalogue.map((c) => {
+              const added = selectedCodes.has(c.code.toUpperCase());
+              return (
+                <button
+                  key={c.code + c.department}
+                  onClick={() => addFromCatalogue(c.code, c.units)}
+                  disabled={added}
+                  className={`flex items-start justify-between gap-2 rounded-xl border p-3 text-left text-xs transition-all ${
+                    added
+                      ? "border-primary/40 bg-primary/10 text-muted-foreground"
+                      : "border-border/60 bg-surface/40 hover:border-primary/50 hover:bg-surface/70"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-semibold text-foreground">{c.code}</div>
+                    <div className="truncate text-muted-foreground">{c.title}</div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {c.units}u
+                    </div>
+                    <div className={`text-[10px] font-medium ${added ? "text-primary" : "text-muted-foreground"}`}>
+                      {added ? "Added" : "+ Add"}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Don't see your course? Add it manually with the "Add course" button below
+            and type any code (e.g. ELT 312).
+          </p>
+        </section>
+
         {/* Forecaster */}
         <section className="grid gap-6 lg:grid-cols-5">
+
           <div className="glass space-y-4 rounded-3xl p-6 lg:col-span-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-semibold">
