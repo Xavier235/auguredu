@@ -11,7 +11,7 @@ export function SiteHeader() {
     { to: "/predictor", label: "JAMB Predictor" },
     { to: "/cgpa", label: "CGPA" },
     { to: "/study-plan", label: "Study Plan" },
-    ...(user ? [{ to: "/profile", label: "My profile" }] : []),
+    ...(user ? [{ to: "/profile", label: "My profile" }, { to: "/settings", label: "Settings" }] : []),
     { to: "/how-it-works", label: "How it works" },
   ];
 
