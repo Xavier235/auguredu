@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,11 +20,16 @@ import {
   BookOpen,
   Target,
   Award,
+  Upload,
+  Settings as SettingsIcon,
+  History,
+  Camera,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { resolveAvatarUrl, uploadAvatar } from "@/lib/avatar";
 import type { PredictorInput, PredictorResult } from "@/lib/predictor";
 
 export const Route = createFileRoute("/profile")({
@@ -63,6 +68,22 @@ type Profile = {
 
 const LEVELS = ["Prospective (JAMB)", "100L", "200L", "300L", "400L", "500L", "600L", "Graduate"];
 
+function computeCompleteness(p: Profile | null): { pct: number; missing: string[] } {
+  if (!p) return { pct: 0, missing: ["display name", "school", "level", "bio", "avatar"] };
+  const checks: [string, boolean][] = [
+    ["display name", !!p.display_name?.trim()],
+    ["school", !!p.school?.trim()],
+    ["level", !!p.level?.trim()],
+    ["bio", !!p.bio?.trim()],
+    ["avatar", !!p.avatar_url?.trim()],
+  ];
+  const done = checks.filter(([, v]) => v).length;
+  return {
+    pct: Math.round((done / checks.length) * 100),
+    missing: checks.filter(([, v]) => !v).map(([k]) => k),
+  };
+}
+
 function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -70,10 +91,13 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState<SavedPrediction | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
-  const [tab, setTab] = useState<"overview" | "predictions">("overview");
+  const [tab, setTab] = useState<"overview" | "predictions" | "history">("overview");
   const [form, setForm] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/auth" });
@@ -100,6 +124,16 @@ function ProfilePage() {
       alive = false;
     };
   }, [user]);
+
+  useEffect(() => {
+    let alive = true;
+    resolveAvatarUrl(profile?.avatar_url).then((u) => {
+      if (alive) setAvatarSrc(u);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [profile?.avatar_url]);
 
   const remove = async (id: string) => {
     if (!confirm("Delete this saved prediction?")) return;
@@ -133,6 +167,35 @@ function ProfilePage() {
     toast.success("Profile saved");
   };
 
+  const onAvatarFile = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("Image must be under 4MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const path = await uploadAvatar(user.id, file);
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, avatar_url: path }, { onConflict: "id" });
+      if (error) throw error;
+      setProfile((p) =>
+        p ? { ...p, avatar_url: path } : { id: user.id, display_name: null, avatar_url: path, school: null, level: null, bio: null },
+      );
+      setForm((f) => ({ ...f, avatar_url: path }));
+      toast.success("Avatar updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const stats = useMemo(() => {
     const count = items.length;
     const avgAgg = count ? items.reduce((s, i) => s + Number(i.aggregate_score || 0), 0) / count : 0;
@@ -140,6 +203,8 @@ function ProfilePage() {
     const bestJamb = count ? Math.max(...items.map((i) => i.jamb_score || 0)) : 0;
     return { count, avgAgg, bestChance, bestJamb };
   }, [items]);
+
+  const completeness = useMemo(() => computeCompleteness(profile), [profile]);
 
   const initials = (profile?.display_name || user?.email || "?")
     .split(/[ @.]/)
@@ -160,12 +225,35 @@ function ProfilePage() {
 
           <div className="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="flex items-start gap-4 md:gap-5">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent text-2xl font-semibold text-primary-foreground glow-primary flex items-center justify-center">
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="font-display">{initials || "?"}</span>
-                )}
+              <div className="group relative">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent text-2xl font-semibold text-primary-foreground glow-primary flex items-center justify-center">
+                  {avatarSrc ? (
+                    <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="font-display">{initials || "?"}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute -bottom-1 -right-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-accent/20 disabled:opacity-60"
+                  aria-label="Change avatar"
+                  title="Upload from device"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                </button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onAvatarFile(f);
+                    e.target.value = "";
+                  }}
+                />
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-medium uppercase tracking-widest text-primary">
@@ -194,17 +282,25 @@ function ProfilePage() {
                 )}
               </div>
             </div>
-            <div>
+            <div className="flex flex-wrap gap-2">
               {!editing ? (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setForm(profile || {});
-                    setEditing(true);
-                  }}
-                >
-                  <Pencil className="mr-2 h-3.5 w-3.5" /> Edit profile
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setForm(profile || {});
+                      setEditing(true);
+                    }}
+                  >
+                    <Pencil className="mr-2 h-3.5 w-3.5" /> Edit profile
+                  </Button>
+                  <Link
+                    to="/settings"
+                    className="inline-flex items-center gap-2 rounded-md border border-border bg-transparent px-4 py-2 text-sm font-medium hover:bg-accent/20"
+                  >
+                    <SettingsIcon className="h-3.5 w-3.5" /> Settings
+                  </Link>
+                </>
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
@@ -216,6 +312,53 @@ function ProfilePage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Profile completeness meter */}
+          <div className="relative mt-6 rounded-2xl border border-border/60 bg-surface/30 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                  Profile completeness
+                </div>
+                <div className="mt-0.5 font-display text-xl font-semibold">
+                  {completeness.pct}%{" "}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {completeness.pct === 100 ? "— all set!" : `· ${5 - completeness.missing.length}/5 complete`}
+                  </span>
+                </div>
+              </div>
+              {completeness.pct < 100 && !editing && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setForm(profile || {});
+                    setEditing(true);
+                  }}
+                >
+                  Complete profile
+                </Button>
+              )}
+            </div>
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-border/60">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
+                style={{ width: `${completeness.pct}%` }}
+              />
+            </div>
+            {completeness.missing.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {completeness.missing.map((m) => (
+                  <span
+                    key={m}
+                    className="rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] uppercase tracking-wider text-muted-foreground"
+                  >
+                    add {m}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Edit form */}
@@ -256,13 +399,27 @@ function ProfilePage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="av">Avatar URL (optional)</Label>
-                <Input
-                  id="av"
-                  value={form.avatar_url || ""}
-                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                  placeholder="https://…"
-                />
+                <Label>Avatar</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="mr-2 h-3.5 w-3.5" />
+                    {uploading ? "Uploading…" : "Upload from device"}
+                  </Button>
+                  {form.avatar_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setForm({ ...form, avatar_url: "" })}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="bio">Bio</Label>
@@ -287,16 +444,22 @@ function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-8 flex gap-2 rounded-full border border-border/60 bg-surface/40 p-1 w-fit">
-          {(["overview", "predictions"] as const).map((t) => (
+        <div className="mt-8 flex flex-wrap gap-2 rounded-full border border-border/60 bg-surface/40 p-1 w-fit">
+          {(
+            [
+              ["overview", "Overview"],
+              ["predictions", "Predictions"],
+              ["history", "History"],
+            ] as const
+          ).map(([t, label]) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors ${
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t}
+              {label}
             </button>
           ))}
         </div>
@@ -304,24 +467,14 @@ function ProfilePage() {
         <div className="mt-6">
           {tab === "overview" ? (
             <OverviewPanel user={user?.email || ""} profile={profile} items={items} />
+          ) : tab === "history" ? (
+            <HistoryPanel items={items} loading={loading} onOpen={setActive} />
           ) : loading ? (
             <div className="glass rounded-3xl p-10 text-center text-muted-foreground">
               Loading your saved predictions…
             </div>
           ) : items.length === 0 ? (
-            <div className="glass rounded-3xl p-10 text-center">
-              <GraduationCap className="mx-auto h-10 w-10 text-primary" />
-              <h2 className="mt-4 font-display text-2xl font-semibold">No saved predictions yet</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Run a prediction and tap "Save to my profile" to keep it here.
-              </p>
-              <Link
-                to="/predictor"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:glow-primary"
-              >
-                <Sparkles className="h-4 w-4" /> Run a prediction
-              </Link>
-            </div>
+            <EmptyPredictions />
           ) : (
             <div className="grid gap-5 md:grid-cols-2">
               {items.map((it) => (
@@ -383,6 +536,99 @@ function ProfilePage() {
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+function EmptyPredictions() {
+  return (
+    <div className="glass rounded-3xl p-10 text-center">
+      <GraduationCap className="mx-auto h-10 w-10 text-primary" />
+      <h2 className="mt-4 font-display text-2xl font-semibold">No saved predictions yet</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+        Run a prediction and tap "Save to my profile" to keep it here.
+      </p>
+      <Link
+        to="/predictor"
+        className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:glow-primary"
+      >
+        <Sparkles className="h-4 w-4" /> Run a prediction
+      </Link>
+    </div>
+  );
+}
+
+function HistoryPanel({
+  items,
+  loading,
+  onOpen,
+}: {
+  items: SavedPrediction[];
+  loading: boolean;
+  onOpen: (i: SavedPrediction) => void;
+}) {
+  if (loading) {
+    return (
+      <div className="glass rounded-3xl p-10 text-center text-muted-foreground">
+        Loading history…
+      </div>
+    );
+  }
+  if (items.length === 0) return <EmptyPredictions />;
+  return (
+    <div className="glass rounded-3xl p-6">
+      <h3 className="flex items-center gap-2 font-display text-lg font-semibold">
+        <History className="h-4 w-4 text-primary" /> Prediction history
+      </h3>
+      <ol className="mt-5 relative space-y-4 border-l border-border/60 pl-5">
+        {items.map((it) => (
+          <li key={it.id} className="relative">
+            <span className="absolute -left-[26px] top-1.5 h-3 w-3 rounded-full border-2 border-primary bg-background" />
+            <button
+              onClick={() => onOpen(it)}
+              className="block w-full rounded-2xl border border-border/60 bg-surface/40 p-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(it.created_at).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                  <div className="mt-0.5 truncate font-medium">
+                    {it.label || it.top_course || "Prediction"}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Chance
+                  </div>
+                  <div className="font-display text-lg font-semibold text-gradient">
+                    {it.top_course_chance ?? 0}%
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full border border-border/60 bg-background/40 px-2 py-0.5">
+                  JAMB {it.jamb_score}
+                </span>
+                <span className="rounded-full border border-border/60 bg-background/40 px-2 py-0.5">
+                  Aggregate {Number(it.aggregate_score).toFixed(1)}
+                </span>
+                {it.top_course && (
+                  <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5">
+                    {it.top_course}
+                  </span>
+                )}
+              </div>
+            </button>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
