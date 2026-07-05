@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -27,6 +28,11 @@ const StudyPlanRoute = StudyPlanRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/predictor'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/study-plan'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/predictor'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/study-plan'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/predictor'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/study-plan'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StudyPlanRoute: typeof StudyPlanRoute
 }
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StudyPlanRoute: StudyPlanRoute,
 }

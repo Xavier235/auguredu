@@ -1,24 +1,32 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, LogOut } from "lucide-react";
+import { Sparkles, LogOut, Search, Lock } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function SiteHeader() {
   const { location } = useRouterState();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [q, setQ] = useState("");
+
   const links = [
     { to: "/", label: "Home" },
     { to: "/predictor", label: "JAMB Predictor" },
     { to: "/cgpa", label: "CGPA" },
     { to: "/study-plan", label: "Study Plan" },
-    ...(user ? [{ to: "/profile", label: "My profile" }, { to: "/settings", label: "Settings" }] : []),
+    { to: "/chat", label: "Chat", locked: true },
+    ...(user
+      ? [
+          { to: "/profile", label: "My profile" },
+          { to: "/settings", label: "Settings" },
+        ]
+      : []),
     { to: "/how-it-works", label: "How it works" },
   ];
 
-
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-5">
         <Link to="/" className="flex items-center gap-2 group">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent glow-primary">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
@@ -35,17 +43,36 @@ export function SiteHeader() {
               <Link
                 key={l.to}
                 to={l.to}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {l.label}
+                {l.locked && <Lock className="h-3 w-3 opacity-70" />}
               </Link>
             );
           })}
         </nav>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const query = q.trim();
+            if (!query) return;
+            navigate({ to: "/search", search: { q: query } });
+          }}
+          className="hidden items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1.5 lg:flex"
+        >
+          <Search className="h-3.5 w-3.5 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search…"
+            className="w-40 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+        </form>
 
         {user ? (
           <div className="flex items-center gap-2">
