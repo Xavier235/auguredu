@@ -44,6 +44,139 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages_v2: {
+        Row: {
+          attachments: Json
+          content: string
+          created_at: string
+          id: string
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_v2_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_threads: {
+        Row: {
+          created_at: string
+          id: string
+          room: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      flashcards: {
+        Row: {
+          answer: string
+          created_at: string
+          deck_name: string
+          id: string
+          question: string
+          source_pdf_id: string | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          deck_name?: string
+          id?: string
+          question: string
+          source_pdf_id?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          deck_name?: string
+          id?: string
+          question?: string
+          source_pdf_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_source_pdf_id_fkey"
+            columns: ["source_pdf_id"]
+            isOneToOne: false
+            referencedRelation: "pdf_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdf_documents: {
+        Row: {
+          created_at: string
+          id: string
+          mime_type: string
+          page_count: number
+          storage_path: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime_type?: string
+          page_count?: number
+          storage_path: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime_type?: string
+          page_count?: number
+          storage_path?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       predictions: {
         Row: {
           aggregate_score: number
@@ -113,6 +246,57 @@ export type Database = {
           level?: string | null
           school?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_xp: {
+        Row: {
+          level: number
+          show_on_leaderboard: boolean
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          level?: number
+          show_on_leaderboard?: boolean
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          level?: number
+          show_on_leaderboard?: boolean
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      xp_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          meta: Json
+          points: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          meta?: Json
+          points: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json
+          points?: number
+          user_id?: string
         }
         Relationships: []
       }
