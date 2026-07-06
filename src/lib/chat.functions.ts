@@ -88,8 +88,7 @@ export const listMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ threadId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
-      .from("chat_messages_v2" as any)
+    const { data: rows, error } = await (context.supabase as any).from("chat_messages_v2")
       .select("*")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true });
@@ -133,7 +132,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     }
 
     // Insert user message
-    const { error: userErr } = await supabase.from("chat_messages_v2" as any).insert({
+    const { error: userErr } = await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
       user_id: userId,
       role: "user",
@@ -171,7 +170,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     const assistantContent = await callGateway(messages);
 
     // Save assistant reply
-    const { error: aErr } = await supabase.from("chat_messages_v2" as any).insert({
+    const { error: aErr } = await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
       user_id: userId,
       role: "assistant",
