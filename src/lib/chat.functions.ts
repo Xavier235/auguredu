@@ -142,8 +142,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     if (userErr) throw new Error(userErr.message);
 
     // Load recent history
-    const { data: history } = await supabase
-      .from("chat_messages_v2" as any)
+    const { data: history } = await (supabase as any)
+      .from("chat_messages_v2")
       .select("role, content, attachments")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true })
@@ -180,8 +180,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     if (aErr) throw new Error(aErr.message);
 
     // Touch thread & auto-title if still default
-    const { data: thread } = await supabase
-      .from("chat_threads" as any)
+    const { data: thread } = await (supabase as any)
+      .from("chat_threads")
       .select("title")
       .eq("id", data.threadId)
       .single();
@@ -213,8 +213,8 @@ export const generateFlashcardsFromAttachment = createServerFn({ method: "POST" 
     // Register PDF document row (for read-to-earn tracking)
     let pdfId: string | null = null;
     if (data.mimeType === "application/pdf" || data.mimeType.startsWith("image/")) {
-      const { data: doc } = await supabase
-        .from("pdf_documents" as any)
+      const { data: doc } = await (supabase as any)
+        .from("pdf_documents")
         .insert({
           user_id: userId,
           storage_path: data.attachmentPath,
@@ -304,16 +304,16 @@ export const awardReadingXp = createServerFn({ method: "POST" })
     // Daily cap
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    const { count } = await supabase
-      .from("xp_events" as any)
+    const { count } = await (supabase as any)
+      .from("xp_events")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
       .gte("created_at", today.toISOString());
     if ((count ?? 0) > 200) return { awarded: 0, reason: "daily reading cap reached" };
 
     // Upsert user_xp
-    const { data: existing } = await supabase
-      .from("user_xp" as any)
+    const { data: existing } = await (supabase as any)
+      .from("user_xp")
       .select("xp, level")
       .eq("user_id", userId)
       .maybeSingle();
@@ -322,8 +322,8 @@ export const awardReadingXp = createServerFn({ method: "POST" })
     if (existing) {
       await (supabase as any).from("user_xp").update({ xp: newXp, level: newLevel }).eq("user_id", userId);
     } else {
-      await supabase
-        .from("user_xp" as any)
+      await (supabase as any)
+        .from("user_xp")
         .insert({ user_id: userId, xp: newXp, level: newLevel });
     }
 
