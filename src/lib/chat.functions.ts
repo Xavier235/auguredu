@@ -40,7 +40,7 @@ async function callGateway(messages: ChatMsg[]): Promise<string> {
 }
 
 async function signAttachment(
-  supabase: ReturnType<typeof requireSupabaseAuth>["_types"] extends never ? any : any,
+  supabase: any,
   path: string,
 ): Promise<string | null> {
   const { data } = await supabase.storage
@@ -54,13 +54,13 @@ async function signAttachment(
 export const listThreads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("chat_threads" as any)
+    const { data, error } = await (context.supabase as any)
+      .from("chat_threads")
       .select("*")
       .order("updated_at", { ascending: false })
       .limit(50);
     if (error) throw new Error(error.message);
-    return data as Array<{ id: string; title: string; room: string; updated_at: string }>;
+    return (data ?? []) as unknown as Array<{ id: string; title: string; room: string; updated_at: string }>;
   });
 
 export const createThread = createServerFn({ method: "POST" })
