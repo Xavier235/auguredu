@@ -73,7 +73,7 @@ export const createThread = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    return row as { id: string; title: string; room: string };
+    return row as unknown as { id: string; title: string; room: string };
   });
 
 export const deleteThread = createServerFn({ method: "POST" })
@@ -95,7 +95,7 @@ export const listMessages = createServerFn({ method: "GET" })
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return rows as Array<{
+    return rows as unknown as Array<{
       id: string;
       role: "user" | "assistant" | "system";
       content: string;
