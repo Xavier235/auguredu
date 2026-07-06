@@ -67,8 +67,7 @@ export const createThread = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ room: z.string().default("study-buddy"), title: z.string().default("New chat") }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase
-      .from("chat_threads" as any)
+    const { data: row, error } = await (context.supabase as any).from("chat_threads")
       .insert({ user_id: context.userId, room: data.room, title: data.title })
       .select()
       .single();
@@ -80,7 +79,7 @@ export const deleteThread = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ threadId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("chat_threads" as any).delete().eq("id", data.threadId);
+    const { error } = await (context.supabase as any).from("chat_threads").delete().eq("id", data.threadId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -191,7 +190,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     if ((thread as any)?.title === "New chat") {
       patch.title = data.content.slice(0, 60);
     }
-    await supabase.from("chat_threads" as any).update(patch).eq("id", data.threadId);
+    await (supabase as any).from("chat_threads").update(patch).eq("id", data.threadId);
 
     return { ok: true, reply: assistantContent };
   });
@@ -266,7 +265,7 @@ export const generateFlashcardsFromAttachment = createServerFn({ method: "POST" 
       question: c.q,
       answer: c.a,
     }));
-    const { error } = await supabase.from("flashcards" as any).insert(rows);
+    const { error } = await (supabase as any).from("flashcards").insert(rows);
     if (error) throw new Error(error.message);
 
     return { deckName, cards, pdfId };
@@ -292,7 +291,7 @@ export const awardReadingXp = createServerFn({ method: "POST" })
 
     // Insert dedupe event (unique index prevents double-award)
     const points = 1;
-    const { error: evErr } = await supabase.from("xp_events" as any).insert({
+    const { error: evErr } = await (supabase as any).from("xp_events").insert({
       user_id: userId,
       kind: "pdf_page_read",
       points,
@@ -322,7 +321,7 @@ export const awardReadingXp = createServerFn({ method: "POST" })
     const newXp = ((existing as any)?.xp ?? 0) + points;
     const newLevel = Math.max(1, Math.floor(newXp / 50) + 1);
     if (existing) {
-      await supabase.from("user_xp" as any).update({ xp: newXp, level: newLevel }).eq("user_id", userId);
+      await (supabase as any).from("user_xp").update({ xp: newXp, level: newLevel }).eq("user_id", userId);
     } else {
       await supabase
         .from("user_xp" as any)
@@ -335,8 +334,7 @@ export const awardReadingXp = createServerFn({ method: "POST" })
 export const getMyXp = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase
-      .from("user_xp" as any)
+    const { data } = await (context.supabase as any).from("user_xp")
       .select("xp, level, show_on_leaderboard")
       .eq("user_id", context.userId)
       .maybeSingle();
@@ -346,8 +344,7 @@ export const getMyXp = createServerFn({ method: "GET" })
 export const getLeaderboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: xp } = await context.supabase
-      .from("user_xp" as any)
+    const { data: xp } = await (context.supabase as any).from("user_xp")
       .select("user_id, xp, level")
       .eq("show_on_leaderboard", true)
       .order("xp", { ascending: false })
@@ -373,8 +370,7 @@ export const getPdfSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ pdfId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: doc, error } = await context.supabase
-      .from("pdf_documents" as any)
+    const { data: doc, error } = await (context.supabase as any).from("pdf_documents")
       .select("*")
       .eq("id", data.pdfId)
       .single();
