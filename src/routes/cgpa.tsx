@@ -167,12 +167,36 @@ function CgpaPage() {
             <IdCard className="h-4 w-4 text-primary" /> Student details (for your report)
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            <TextField
-              label="Student ID"
-              value={studentId}
-              onChange={setStudentId}
-              placeholder="RUN/CMP/21/1001"
-            />
+            <div>
+              <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+                Matric number
+              </span>
+              <input
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value.toUpperCase())}
+                placeholder="e.g. 210401234 or RUN/CMP/21/1001"
+                className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2.5 text-sm font-mono outline-none focus:border-primary"
+              />
+              {(() => {
+                const m = validateMatric(studentId);
+                if (!studentId.trim()) return null;
+                return m.valid ? (
+                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-primary">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Valid matric ({m.format}
+                    {m.school ? ` · ${m.school}` : ""})
+                  </div>
+                ) : (
+                  <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-orange-400">
+                    <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" />
+                    <span>
+                      Doesn't look like a Nigerian matric number. Examples: {MATRIC_EXAMPLES.slice(0, 3).join(", ")}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
+
             <div>
               <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
                 Gender
