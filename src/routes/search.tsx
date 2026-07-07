@@ -75,7 +75,7 @@ const COURSES: Entry[] = [
   ["MEE 201", "Engineering Mechanics", "Statics and dynamics."],
   ["MBBS 200", "Anatomy & Physiology", "Human systems overview."],
 ].map(([code, title, desc]) => ({
-  to: `/chat?t=`,
+  to: "/chat",
   title: `${code} — ${title}`,
   desc,
   keywords: [code.toLowerCase(), code.replace(" ", "").toLowerCase(), title.toLowerCase()],
@@ -92,7 +92,7 @@ const PROFESSORS: Entry[] = [
   ["Prof. Halima Yusuf", "Medicine, ABU", "Public health"],
   ["Dr. Emeka Nwosu", "Chemistry, UNIBEN", "Organic chemistry"],
 ].map(([name, dept, focus]) => ({
-  to: `/chat?t=`,
+  to: "/chat",
   title: name,
   desc: `${dept} · ${focus}`,
   keywords: [name.toLowerCase(), dept.toLowerCase(), focus.toLowerCase()],
