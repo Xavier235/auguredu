@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      chat_messages: {
-        Row: {
-          avatar_url: string | null
-          content: string
-          created_at: string
-          display_name: string | null
-          id: string
-          room: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          content: string
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          room?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          content?: string
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          room?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       chat_messages_v2: {
         Row: {
           attachments: Json
