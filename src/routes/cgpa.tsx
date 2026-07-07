@@ -24,7 +24,11 @@ import {
   ArrowRight,
   IdCard,
   BookOpen,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { validateMatric, MATRIC_EXAMPLES } from "@/lib/matric";
+
 
 
 export const Route = createFileRoute("/cgpa")({
