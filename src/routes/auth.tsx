@@ -29,13 +29,18 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/predictor" });
   }, [user, loading, navigate]);
 
+  const emailInfo = classifyEmail(email);
+  const showConsumerHint = mode === "signup" && email.includes("@") && emailInfo.kind === "consumer";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -56,11 +61,14 @@ function AuthPage() {
         navigate({ to: "/predictor" });
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      const msg = friendlyAuthError(err instanceof Error ? err.message : undefined);
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   };
+
 
   const handleGoogle = async () => {
     setBusy(true);
