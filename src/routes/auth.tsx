@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, AlertCircle, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { classifyEmail, friendlyAuthError } from "@/lib/student-email";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -27,13 +29,18 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/predictor" });
   }, [user, loading, navigate]);
 
+  const emailInfo = classifyEmail(email);
+  const showConsumerHint = mode === "signup" && email.includes("@") && emailInfo.kind === "consumer";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -54,11 +61,14 @@ function AuthPage() {
         navigate({ to: "/predictor" });
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      const msg = friendlyAuthError(err instanceof Error ? err.message : undefined);
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   };
+
 
   const handleGoogle = async () => {
     setBusy(true);
@@ -130,6 +140,14 @@ function AuthPage() {
                 placeholder="you@school.edu"
               />
             </div>
+            {showConsumerHint && (
+              <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-2.5 text-xs text-foreground">
+                <GraduationCap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                <span>
+                  We recommend using your school email (ending in <code>.edu</code>, <code>.edu.ng</code> or <code>.ac.ng</code>) so we can verify you as a student.
+                </span>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -142,9 +160,19 @@ function AuthPage() {
                 placeholder="••••••••"
               />
             </div>
+            {errorMsg && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
+
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
