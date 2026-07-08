@@ -409,3 +409,67 @@ export const getPdfSignedUrl = createServerFn({ method: "POST" })
     const url = await signAttachment(context.supabase, (doc as any).storage_path);
     return { url, title: (doc as any).title, mimeType: (doc as any).mime_type, pageCount: (doc as any).page_count };
   });
+
+// -------- Ask the lecturer (paid tier, quota'd for free) --------
+
+export const askLecturer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ threadId: z.string().uuid(), question: z.string().min(3).max(2000) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await enforceQuota(supabase, userId, "lecturer");
+
+    await (supabase as any).from("chat_messages_v2").insert({
+      thread_id: data.threadId,
+      user_id: userId,
+      role: "user",
+      content: `[Lecturer] ${data.question}`,
+      attachments: [],
+    });
+
+    const reply = await callGateway([
+      { role: "system", content: LECTURER_PROMPT },
+      { role: "user", content: data.question },
+    ]);
+
+    await (supabase as any).from("chat_messages_v2").insert({
+      thread_id: data.threadId,
+      user_id: userId,
+      role: "assistant",
+      content: reply,
+      attachments: [],
+    });
+
+    return { ok: true, reply };
+  });
+
+// -------- Usage + profile helpers --------
+
+export const getMyUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("my_usage_today");
+    if (error) throw new Error(error.message);
+    const map: Record<string, number> = { chat: 0, flashcards: 0, lecturer: 0 };
+    for (const row of ((data as any[]) ?? [])) map[row.feature] = row.count;
+    return { limits: { chat: 30, flashcards: 5, lecturer: 5 }, used: map };
+  });
+
+export const getMyProfileBadges = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await (context.supabase as any)
+      .from("profiles")
+      .select("is_verified_student, verified_domain, subscription_tier, display_name, avatar_url")
+      .eq("id", context.userId)
+      .maybeSingle();
+    return (data as any) ?? {
+      is_verified_student: false,
+      verified_domain: null,
+      subscription_tier: "free",
+      display_name: null,
+      avatar_url: null,
+    };
+  });
