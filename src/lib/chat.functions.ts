@@ -7,6 +7,35 @@ const MODEL = "google/gemini-3-flash-preview";
 
 const SYSTEM_PROMPT = `You are Augur AI, a friendly Nigerian university study buddy. You help students with JAMB prep, coursework, CGPA planning, and study skills. You know Nigerian university course codes (e.g. MTH 101, CSC 202, GST 105) and reference them precisely. Keep answers concise, use markdown, and cite course codes when relevant. You are NOT a lecturer — for lecturer-verified answers, tell users the Lecturer tier is coming.`;
 
+const LECTURER_PROMPT = `You are Augur Lecturer — a premium, exam-focused Nigerian university lecturer AI. Answer at a lecturer's depth: define terms, derive formulas, walk through worked examples, and reference the exact Nigerian syllabus course code (e.g. CSC 202, MTH 201) when possible. Structure answers with clear headings, numbered steps, and always end with a short "Study checklist" of 3 bullet points.`;
+
+// Per-feature free-tier daily caps. Paid users bypass via profiles.subscription_tier.
+const FREE_LIMITS = { chat: 30, flashcards: 5, lecturer: 5 } as const;
+type Feature = keyof typeof FREE_LIMITS;
+
+async function enforceQuota(supabase: any, userId: string, feature: Feature) {
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("subscription_tier")
+    .eq("id", userId)
+    .maybeSingle();
+  if ((prof as any)?.subscription_tier && (prof as any).subscription_tier !== "free") {
+    return { allowed: true as const, count: 0, limit: -1 };
+  }
+  const { data, error } = await supabase.rpc("consume_quota", {
+    _feature: feature,
+    _limit: FREE_LIMITS[feature],
+  });
+  if (error) throw new Error(error.message);
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.allowed) {
+    throw new Error(
+      `Daily ${feature} limit reached (${row?.day_limit ?? FREE_LIMITS[feature]}/day on the free plan). Resets at midnight UTC — or upgrade for unlimited.`,
+    );
+  }
+  return { allowed: true as const, count: row.new_count as number, limit: row.day_limit as number };
+}
+
 type Attachment = {
   url: string;
   mimeType: string;
