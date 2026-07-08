@@ -153,6 +153,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    await enforceQuota(supabase, userId, "chat");
+
     // Sign attachments
     const signed: Attachment[] = [];
     for (const a of data.attachments) {
