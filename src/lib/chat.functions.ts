@@ -238,6 +238,7 @@ export const generateFlashcardsFromAttachment = createServerFn({ method: "POST" 
   .inputValidator((d: unknown) => flashSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    await enforceQuota(supabase, userId, "flashcards");
     const url = await signAttachment(supabase, data.attachmentPath);
     if (!url) throw new Error("Could not access file");
 
