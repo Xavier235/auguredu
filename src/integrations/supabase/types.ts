@@ -193,9 +193,12 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_verified_student: boolean
           level: string | null
           school: string | null
+          subscription_tier: string
           updated_at: string
+          verified_domain: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -203,9 +206,12 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          is_verified_student?: boolean
           level?: string | null
           school?: string | null
+          subscription_tier?: string
           updated_at?: string
+          verified_domain?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -213,9 +219,36 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_verified_student?: boolean
           level?: string | null
           school?: string | null
+          subscription_tier?: string
           updated_at?: string
+          verified_domain?: string | null
+        }
+        Relationships: []
+      }
+      usage_counters: {
+        Row: {
+          count: number
+          day: string
+          feature: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day?: string
+          feature: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          feature?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -275,7 +308,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_quota: {
+        Args: { _feature: string; _limit: number }
+        Returns: {
+          allowed: boolean
+          day_limit: number
+          new_count: number
+        }[]
+      }
+      my_usage_today: {
+        Args: never
+        Returns: {
+          count: number
+          feature: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
