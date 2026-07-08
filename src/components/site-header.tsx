@@ -1,7 +1,8 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, LogOut, Search, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Sparkles, LogOut, Search, Menu, X, ShieldCheck, Crown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -9,6 +10,21 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [tier, setTier] = useState<string>("free");
+
+  useEffect(() => {
+    if (!user) { setVerified(false); setTier("free"); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_verified_student, subscription_tier")
+        .eq("id", user.id)
+        .maybeSingle();
+      setVerified(!!(data as any)?.is_verified_student);
+      setTier((data as any)?.subscription_tier ?? "free");
+    })();
+  }, [user?.id]);
 
   const links = [
     { to: "/", label: "Home" },
