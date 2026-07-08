@@ -1,7 +1,8 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, LogOut, Search, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Sparkles, LogOut, Search, Menu, X, ShieldCheck, Crown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -9,6 +10,21 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [tier, setTier] = useState<string>("free");
+
+  useEffect(() => {
+    if (!user) { setVerified(false); setTier("free"); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_verified_student, subscription_tier")
+        .eq("id", user.id)
+        .maybeSingle();
+      setVerified(!!(data as any)?.is_verified_student);
+      setTier((data as any)?.subscription_tier ?? "free");
+    })();
+  }, [user?.id]);
 
   const links = [
     { to: "/", label: "Home" },
@@ -83,6 +99,16 @@ export function SiteHeader() {
         <div className="hidden md:block">
           {user ? (
             <div className="flex items-center gap-2">
+              {verified && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+                  <ShieldCheck className="h-3 w-3" /> Verified student
+                </span>
+              )}
+              {tier !== "free" && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                  <Crown className="h-3 w-3" /> {tier}
+                </span>
+              )}
               <span className="hidden text-sm text-muted-foreground xl:inline">
                 {user.email}
               </span>

@@ -7,6 +7,35 @@ const MODEL = "google/gemini-3-flash-preview";
 
 const SYSTEM_PROMPT = `You are Augur AI, a friendly Nigerian university study buddy. You help students with JAMB prep, coursework, CGPA planning, and study skills. You know Nigerian university course codes (e.g. MTH 101, CSC 202, GST 105) and reference them precisely. Keep answers concise, use markdown, and cite course codes when relevant. You are NOT a lecturer — for lecturer-verified answers, tell users the Lecturer tier is coming.`;
 
+const LECTURER_PROMPT = `You are Augur Lecturer — a premium, exam-focused Nigerian university lecturer AI. Answer at a lecturer's depth: define terms, derive formulas, walk through worked examples, and reference the exact Nigerian syllabus course code (e.g. CSC 202, MTH 201) when possible. Structure answers with clear headings, numbered steps, and always end with a short "Study checklist" of 3 bullet points.`;
+
+// Per-feature free-tier daily caps. Paid users bypass via profiles.subscription_tier.
+const FREE_LIMITS = { chat: 30, flashcards: 5, lecturer: 5 } as const;
+type Feature = keyof typeof FREE_LIMITS;
+
+async function enforceQuota(supabase: any, userId: string, feature: Feature) {
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("subscription_tier")
+    .eq("id", userId)
+    .maybeSingle();
+  if ((prof as any)?.subscription_tier && (prof as any).subscription_tier !== "free") {
+    return { allowed: true as const, count: 0, limit: -1 };
+  }
+  const { data, error } = await supabase.rpc("consume_quota", {
+    _feature: feature,
+    _limit: FREE_LIMITS[feature],
+  });
+  if (error) throw new Error(error.message);
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.allowed) {
+    throw new Error(
+      `Daily ${feature} limit reached (${row?.day_limit ?? FREE_LIMITS[feature]}/day on the free plan). Resets at midnight UTC — or upgrade for unlimited.`,
+    );
+  }
+  return { allowed: true as const, count: row.new_count as number, limit: row.day_limit as number };
+}
+
 type Attachment = {
   url: string;
   mimeType: string;
@@ -124,6 +153,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    await enforceQuota(supabase, userId, "chat");
+
     // Sign attachments
     const signed: Attachment[] = [];
     for (const a of data.attachments) {
@@ -207,6 +238,7 @@ export const generateFlashcardsFromAttachment = createServerFn({ method: "POST" 
   .inputValidator((d: unknown) => flashSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    await enforceQuota(supabase, userId, "flashcards");
     const url = await signAttachment(supabase, data.attachmentPath);
     if (!url) throw new Error("Could not access file");
 
@@ -376,4 +408,68 @@ export const getPdfSignedUrl = createServerFn({ method: "POST" })
     if (error || !doc) throw new Error("PDF not found");
     const url = await signAttachment(context.supabase, (doc as any).storage_path);
     return { url, title: (doc as any).title, mimeType: (doc as any).mime_type, pageCount: (doc as any).page_count };
+  });
+
+// -------- Ask the lecturer (paid tier, quota'd for free) --------
+
+export const askLecturer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ threadId: z.string().uuid(), question: z.string().min(3).max(2000) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await enforceQuota(supabase, userId, "lecturer");
+
+    await (supabase as any).from("chat_messages_v2").insert({
+      thread_id: data.threadId,
+      user_id: userId,
+      role: "user",
+      content: `[Lecturer] ${data.question}`,
+      attachments: [],
+    });
+
+    const reply = await callGateway([
+      { role: "system", content: LECTURER_PROMPT },
+      { role: "user", content: data.question },
+    ]);
+
+    await (supabase as any).from("chat_messages_v2").insert({
+      thread_id: data.threadId,
+      user_id: userId,
+      role: "assistant",
+      content: reply,
+      attachments: [],
+    });
+
+    return { ok: true, reply };
+  });
+
+// -------- Usage + profile helpers --------
+
+export const getMyUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("my_usage_today");
+    if (error) throw new Error(error.message);
+    const map: Record<string, number> = { chat: 0, flashcards: 0, lecturer: 0 };
+    for (const row of ((data as any[]) ?? [])) map[row.feature] = row.count;
+    return { limits: { chat: 30, flashcards: 5, lecturer: 5 }, used: map };
+  });
+
+export const getMyProfileBadges = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await (context.supabase as any)
+      .from("profiles")
+      .select("is_verified_student, verified_domain, subscription_tier, display_name, avatar_url")
+      .eq("id", context.userId)
+      .maybeSingle();
+    return (data as any) ?? {
+      is_verified_student: false,
+      verified_domain: null,
+      subscription_tier: "free",
+      display_name: null,
+      avatar_url: null,
+    };
   });
