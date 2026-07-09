@@ -36,6 +36,7 @@ export function SiteHeader() {
       ? [
           { to: "/profile", label: "My profile" },
           { to: "/settings", label: "Settings" },
+          ...(tier === "free" ? [{ to: "/upgrade", label: "Upgrade" }] : []),
         ]
       : []),
     { to: "/how-it-works", label: "How it works" },
