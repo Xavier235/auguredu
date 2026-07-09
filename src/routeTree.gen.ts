@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
@@ -21,6 +22,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
 
+const UpgradeRoute = UpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudyPlanRoute = StudyPlanRouteImport.update({
   id: '/study-plan',
   path: '/study-plan',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
+  '/upgrade': typeof UpgradeRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRoutesByTo {
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
+  '/upgrade': typeof UpgradeRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRoutesById {
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
+  '/upgrade': typeof UpgradeRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/study-plan'
+    | '/upgrade'
     | '/read/$pdfId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/study-plan'
+    | '/upgrade'
     | '/read/$pdfId'
   id:
     | '__root__'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/study-plan'
+    | '/upgrade'
     | '/read/$pdfId'
   fileRoutesById: FileRoutesById
 }
@@ -170,11 +182,19 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   StudyPlanRoute: typeof StudyPlanRoute
+  UpgradeRoute: typeof UpgradeRoute
   ReadPdfIdRoute: typeof ReadPdfIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upgrade': {
+      id: '/upgrade'
+      path: '/upgrade'
+      fullPath: '/upgrade'
+      preLoaderRoute: typeof UpgradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/study-plan': {
       id: '/study-plan'
       path: '/study-plan'
@@ -266,6 +286,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   StudyPlanRoute: StudyPlanRoute,
+  UpgradeRoute: UpgradeRoute,
   ReadPdfIdRoute: ReadPdfIdRoute,
 }
 export const routeTree = rootRouteImport
