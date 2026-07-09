@@ -117,6 +117,54 @@ export type Database = {
           },
         ]
       }
+      payment_requests: {
+        Row: {
+          admin_notes: string | null
+          amount_naira: number
+          created_at: string
+          id: string
+          note: string | null
+          plan: string
+          receipt_path: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_name: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_naira: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          plan: string
+          receipt_path: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_naira?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          plan?: string
+          receipt_path?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdf_documents: {
         Row: {
           created_at: string
@@ -196,6 +244,7 @@ export type Database = {
           is_verified_student: boolean
           level: string | null
           school: string | null
+          subscription_expires_at: string | null
           subscription_tier: string
           updated_at: string
           verified_domain: string | null
@@ -209,6 +258,7 @@ export type Database = {
           is_verified_student?: boolean
           level?: string | null
           school?: string | null
+          subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
           verified_domain?: string | null
@@ -222,6 +272,7 @@ export type Database = {
           is_verified_student?: boolean
           level?: string | null
           school?: string | null
+          subscription_expires_at?: string | null
           subscription_tier?: string
           updated_at?: string
           verified_domain?: string | null
@@ -248,6 +299,27 @@ export type Database = {
           day?: string
           feature?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -316,6 +388,13 @@ export type Database = {
           new_count: number
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       my_usage_today: {
         Args: never
         Returns: {
@@ -325,7 +404,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -452,6 +531,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
