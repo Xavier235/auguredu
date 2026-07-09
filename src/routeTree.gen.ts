@@ -21,6 +21,7 @@ import { Route as CgpaRouteImport } from './routes/cgpa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
@@ -82,6 +83,11 @@ const ReadPdfIdRoute = ReadPdfIdRouteImport.update({
   path: '/read/$pdfId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/admin/payments',
+  path: '/admin/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/study-plan'
     | '/upgrade'
+    | '/admin/payments'
     | '/read/$pdfId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/study-plan'
     | '/upgrade'
+    | '/admin/payments'
     | '/read/$pdfId'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/study-plan'
     | '/upgrade'
+    | '/admin/payments'
     | '/read/$pdfId'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudyPlanRoute: typeof StudyPlanRoute
   UpgradeRoute: typeof UpgradeRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
   ReadPdfIdRoute: typeof ReadPdfIdRoute
 }
 
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReadPdfIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/admin/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudyPlanRoute: StudyPlanRoute,
   UpgradeRoute: UpgradeRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
   ReadPdfIdRoute: ReadPdfIdRoute,
 }
 export const routeTree = rootRouteImport
