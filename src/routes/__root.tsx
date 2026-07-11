@@ -122,6 +122,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
 
       <AuthProvider>
+        <PaymentNotifier />
         <Outlet />
       </AuthProvider>
     </QueryClientProvider>
