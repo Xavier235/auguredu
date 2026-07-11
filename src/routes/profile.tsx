@@ -440,6 +440,12 @@ function ProfilePage() {
           )}
         </div>
 
+        {/* Premium status banner */}
+        <PremiumBanner
+          tier={profile?.subscription_tier ?? "free"}
+          expiresAt={profile?.subscription_expires_at ?? null}
+        />
+
         {/* Stat strip */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <BigStat icon={<Sparkles className="h-4 w-4" />} label="Predictions" value={`${stats.count}`} />
