@@ -264,8 +264,13 @@ function ProfilePage() {
                 <div className="text-xs font-medium uppercase tracking-widest text-primary">
                   Academic profile
                 </div>
-                <h1 className="mt-1 font-display text-2xl font-semibold md:text-3xl truncate">
+                <h1 className="mt-1 font-display text-2xl font-semibold md:text-3xl truncate flex items-center gap-2 flex-wrap">
                   {profile?.display_name || user?.email?.split("@")[0] || "Your profile"}
+                  {profile?.subscription_tier && profile.subscription_tier !== "free" && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-amber-200 shadow-sm animate-pulse">
+                      <Crown className="h-3 w-3" /> {tierLabel(profile.subscription_tier)}
+                    </span>
+                  )}
                 </h1>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/40 px-2.5 py-1">
