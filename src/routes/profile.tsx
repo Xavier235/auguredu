@@ -837,3 +837,99 @@ function DetailModal({
     </div>
   );
 }
+
+function PremiumBanner({ tier, expiresAt }: { tier: string; expiresAt: string | null }) {
+  const isPremium = tier && tier !== "free";
+  const daysLeft = expiresAt
+    ? Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  if (!isPremium) {
+    return (
+      <div className="mt-6 glass relative overflow-hidden rounded-3xl p-5 md:p-6">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-500/15 blur-3xl" />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg">
+              <Crown className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="font-display text-lg font-semibold">You're on the Free plan</div>
+              <div className="text-sm text-muted-foreground">
+                Read-to-earn XP, predictors and CGPA tools stay free — unlock unlimited AI chat, PDF flashcards and Professor Access with Pro.
+              </div>
+            </div>
+          </div>
+          <Link
+            to="/upgrade"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:opacity-95"
+          >
+            <Zap className="h-4 w-4" /> Upgrade
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isProfessor = tier === "lecturer";
+  return (
+    <div
+      className={`mt-6 glass relative overflow-hidden rounded-3xl p-5 md:p-6 ring-1 ${
+        isProfessor ? "ring-amber-400/40" : "ring-primary/40"
+      }`}
+    >
+      <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-amber-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+      <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3">
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg ${
+              isProfessor
+                ? "bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500"
+                : "bg-gradient-to-br from-primary to-accent"
+            }`}
+          >
+            <Crown className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xl font-semibold">
+                {tierLabel(tier)} member
+              </span>
+              <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                Active
+              </span>
+            </div>
+            <div className="mt-0.5 text-sm text-muted-foreground">
+              {isProfessor
+                ? "Professor Access unlocked — human-style worked examples & syllabus mapping."
+                : "Pro unlocked — unlimited AI Study Buddy, flashcards & PDF chat."}
+            </div>
+            {daysLeft !== null && (
+              <div className="mt-2 text-xs">
+                <span className={daysLeft <= 7 ? "text-amber-300" : "text-muted-foreground"}>
+                  {daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining` : "Expired"}
+                  {expiresAt && ` · renews / ends ${new Date(expiresAt).toLocaleDateString()}`}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/chat"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Open chat
+          </Link>
+          <Link
+            to="/upgrade"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-4 py-2 text-xs font-medium hover:bg-accent/20"
+          >
+            Manage plan
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
