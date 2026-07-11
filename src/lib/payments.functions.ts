@@ -30,6 +30,25 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => submitSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Enforce path ownership: receiptPath must live under this user's folder
+    if (!data.receiptPath.startsWith(`${userId}/`)) {
+      throw new Error("Invalid receipt path");
+    }
+
+    // Confirm the uploaded object actually exists in storage
+    const folder = data.receiptPath.substring(0, data.receiptPath.lastIndexOf("/"));
+    const filename = data.receiptPath.substring(data.receiptPath.lastIndexOf("/") + 1);
+    const { data: listing, error: listErr } = await (supabase as any).storage
+      .from("receipts")
+      .list(folder, { search: filename, limit: 1 });
+    if (listErr) throw new Error(listErr.message);
+    const obj = (listing ?? []).find((o: any) => o.name === filename);
+    if (!obj) throw new Error("Receipt file not found in storage");
+    const sizeBytes = obj?.metadata?.size ?? 0;
+    if (sizeBytes > 10 * 1024 * 1024) throw new Error("Receipt exceeds 10 MB limit");
+    if (sizeBytes > 0 && sizeBytes < 2 * 1024) throw new Error("Receipt looks empty or too small");
+
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
       .insert({
