@@ -64,6 +64,8 @@ type Profile = {
   school: string | null;
   level: string | null;
   bio: string | null;
+  subscription_tier?: string | null;
+  subscription_expires_at?: string | null;
 };
 
 const LEVELS = ["Prospective (JAMB)", "100L", "200L", "300L", "400L", "500L", "600L", "Graduate"];
