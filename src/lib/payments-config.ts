@@ -1,13 +1,12 @@
 // Manual bank-transfer payment configuration.
-// Update BANK_DETAILS with your permanent receiving account.
+// Bank details for receiving Naira payments via Opay.
 
 export const BANK_DETAILS = {
-  bankName: "TO BE PROVIDED",
-  accountName: "TO BE PROVIDED",
-  accountNumber: "0000000000",
-  // Optional secondary rail (e.g. Opay/Kuda/USDT)
-  altLabel: "",
-  altValue: "",
+  bankName: "Opay",
+  accountName: "Ayinde Adebola Temiloluwa",
+  accountNumber: "TO BE PROVIDED", // Reply with the 10-digit Opay account number to fill this in
+  altLabel: "Also",
+  altValue: "Opay transfers accepted",
 };
 
 export type PlanId = "lecturer_monthly" | "lecturer_yearly" | "pro_monthly" | "pro_yearly";
@@ -20,36 +19,70 @@ export const PLANS: Record<
     name: "Pro — Monthly",
     tier: "pro",
     period: "month",
-    priceNaira: 2500,
+    priceNaira: 25000,
     blurb: "Unlimited AI Study Buddy, flashcards & PDF chat.",
-    perks: ["Unlimited AI chat", "Unlimited flashcards", "PDF & image uploads", "Read-to-earn XP boost"],
+    perks: [
+      "Unlimited AI Study Buddy chat",
+      "Unlimited flashcards from PDFs & images",
+      "PDF & image uploads in chat",
+      "Priority AI responses",
+    ],
   },
   pro_yearly: {
     name: "Pro — Yearly",
     tier: "pro",
     period: "year",
-    priceNaira: 24000,
-    blurb: "Save 20% — best value for a full academic session.",
-    perks: ["Everything in Pro monthly", "Save ₦6,000 vs monthly", "Priority AI response"],
+    priceNaira: 100000,
+    blurb: "Save ₦200,000 vs monthly — best value for a full academic session.",
+    perks: [
+      "Everything in Pro Monthly",
+      "Save ₦200,000 vs monthly billing",
+      "Priority AI responses & faster queue",
+      "Early access to new predictors & tools",
+      "Advanced CGPA scenario planner",
+      "Exportable PDF study reports",
+      "Priority support (24h response)",
+    ],
   },
   lecturer_monthly: {
-    name: "Lecturer AI — Monthly",
+    name: "Professor Access — Monthly",
     tier: "lecturer",
     period: "month",
-    priceNaira: 5000,
-    blurb: "Premium lecturer-grade answers with worked examples & syllabus mapping.",
-    perks: ["Everything in Pro", "Lecturer AI (30 requests/day)", "Deep worked examples", "Course-code cross mapping"],
+    priceNaira: 40000,
+    blurb: "Talk to a Nigerian university professor — worked examples, syllabus mapping and exam-style answers.",
+    perks: [
+      "Everything in Pro",
+      "Professor Chat — 30 questions per day",
+      "Worked examples & step-by-step solutions",
+      "Syllabus & course-code cross mapping",
+      "Priority receipt review",
+    ],
   },
   lecturer_yearly: {
-    name: "Lecturer AI — Yearly",
+    name: "Professor Access — Yearly",
     tier: "lecturer",
     period: "year",
-    priceNaira: 48000,
-    blurb: "Full-year lecturer access. Save 20%.",
-    perks: ["Everything in Lecturer monthly", "Save ₦12,000 vs monthly", "Priority review of receipts"],
+    priceNaira: 160000,
+    blurb: "A full academic year of professor-level guidance. Save ₦320,000.",
+    perks: [
+      "Everything in Professor Monthly",
+      "Save ₦320,000 vs monthly billing",
+      "Unlimited professor questions (fair-use)",
+      "Personal semester study coach",
+      "Past-question walkthroughs on demand",
+      "Priority research & citation help",
+      "Direct WhatsApp escalation for urgent exam prep",
+      "Priority approval on receipts (under 1 hour)",
+    ],
   },
 };
 
 export function formatNaira(n: number) {
   return "₦" + n.toLocaleString("en-NG");
+}
+
+export function tierLabel(tier: string) {
+  if (tier === "lecturer") return "Professor";
+  if (tier === "pro") return "Pro";
+  return "Free";
 }
