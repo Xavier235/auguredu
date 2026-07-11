@@ -17,10 +17,10 @@ export const Route = createFileRoute("/upgrade")({
       {
         name: "description",
         content:
-          "Unlock Augur Pro & Lecturer AI. Pay by bank transfer to our verified Nigerian account and upload your receipt for instant review.",
+          "Unlock Augur Pro & Professor Access. Pay by Opay bank transfer and upload your receipt for fast manual approval.",
       },
       { property: "og:title", content: "Upgrade — Augur.edu" },
-      { property: "og:description", content: "Bank-transfer payments for Nigerian students. Fast manual approval." },
+      { property: "og:description", content: "Naira bank-transfer payments for Nigerian students. Fast manual approval." },
     ],
   }),
   component: UpgradePage,
