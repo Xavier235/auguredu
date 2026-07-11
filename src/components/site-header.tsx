@@ -3,6 +3,7 @@ import { Sparkles, LogOut, Search, Menu, X, ShieldCheck, Crown } from "lucide-re
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { tierLabel } from "@/lib/payments-config";
 
 export function SiteHeader() {
   const { location } = useRouterState();
