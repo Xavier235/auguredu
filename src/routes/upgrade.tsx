@@ -78,23 +78,66 @@ function UpgradePage() {
     }
   }
 
+  const ALLOWED_MIME = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+    "application/pdf",
+  ];
+  const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif|pdf)$/i;
+  const MAX_BYTES = 10 * 1024 * 1024;
+  const MIN_BYTES = 2 * 1024;
+
+  function validateFile(f: File | null): string | null {
+    if (!f) return "Please attach your payment receipt (screenshot or PDF).";
+    if (!ALLOWED_EXT.test(f.name)) return "Unsupported file type. Use PNG, JPG, WEBP, HEIC or PDF.";
+    if (f.type && !ALLOWED_MIME.includes(f.type)) {
+      return "Unsupported file type. Use PNG, JPG, WEBP, HEIC or PDF.";
+    }
+    if (f.size > MAX_BYTES) return "Receipt is too large — must be under 10 MB.";
+    if (f.size < MIN_BYTES) return "Receipt looks empty or too small (min 2 KB).";
+    return null;
+  }
+
+  function onPickFile(f: File | null) {
+    if (!f) { setFile(null); return; }
+    const err = validateFile(f);
+    if (err) { toast.error(err); if (fileRef.current) fileRef.current.value = ""; return; }
+    setFile(f);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    if (!file) {
-      toast.error("Please attach your payment receipt (screenshot or PDF)");
+
+    const trimmedSender = senderName.trim();
+    if (!trimmedSender || trimmedSender.length < 2) {
+      toast.error("Enter the name on the transfer (min 2 characters) so we can match it.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Receipt must be under 10 MB");
+    if (trimmedSender.length > 120) {
+      toast.error("Sender name is too long (max 120 characters).");
       return;
     }
+    if (!/^[\p{L}\p{M}'\-.\s]+$/u.test(trimmedSender)) {
+      toast.error("Sender name has invalid characters — letters, spaces, ' and - only.");
+      return;
+    }
+    if (note.length > 500) {
+      toast.error("Note is too long (max 500 characters).");
+      return;
+    }
+    const fileErr = validateFile(file);
+    if (fileErr) { toast.error(fileErr); return; }
+
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
+      const ext = (file!.name.split(".").pop() || "png").toLowerCase();
       const path = `${user.id}/${Date.now()}-${plan}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("receipts").upload(path, file, {
-        contentType: file.type || "image/png",
+      const { error: upErr } = await supabase.storage.from("receipts").upload(path, file!, {
+        contentType: file!.type || "image/png",
         upsert: false,
       });
       if (upErr) throw upErr;
@@ -103,8 +146,8 @@ function UpgradePage() {
           plan,
           amountNaira: selected.priceNaira,
           receiptPath: path,
-          senderName: senderName || undefined,
-          note: note || undefined,
+          senderName: trimmedSender,
+          note: note.trim() || undefined,
         },
       });
       toast.success("Receipt submitted — you'll get access as soon as we verify (usually within a few hours).");
