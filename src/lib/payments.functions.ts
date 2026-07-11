@@ -4,12 +4,25 @@ import { z } from "zod";
 
 const planSchema = z.enum(["lecturer_monthly", "lecturer_yearly", "pro_monthly", "pro_yearly"]);
 
+// Only accept common receipt formats (matches storage path suffix)
+const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif|pdf)$/i;
+
 const submitSchema = z.object({
   plan: planSchema,
-  amountNaira: z.number().int().min(100).max(10_000_000),
-  receiptPath: z.string().min(3),
-  senderName: z.string().max(120).optional(),
-  note: z.string().max(500).optional(),
+  amountNaira: z.number().int().min(500, "Amount too low").max(10_000_000, "Amount too high"),
+  receiptPath: z
+    .string()
+    .min(6, "Missing receipt")
+    .max(400)
+    .regex(ALLOWED_EXT, "Receipt must be an image (PNG/JPG/WEBP/HEIC) or a PDF"),
+  senderName: z
+    .string()
+    .trim()
+    .min(2, "Sender name too short")
+    .max(120)
+    .regex(/^[\p{L}\p{M}'\-.\s]+$/u, "Sender name has invalid characters")
+    .optional(),
+  note: z.string().trim().max(500).optional(),
 });
 
 export const submitPaymentRequest = createServerFn({ method: "POST" })
