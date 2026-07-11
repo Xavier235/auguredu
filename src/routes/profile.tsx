@@ -24,7 +24,10 @@ import {
   Settings as SettingsIcon,
   History,
   Camera,
+  Crown,
+  Zap,
 } from "lucide-react";
+import { tierLabel } from "@/lib/payments-config";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -64,6 +67,8 @@ type Profile = {
   school: string | null;
   level: string | null;
   bio: string | null;
+  subscription_tier?: string | null;
+  subscription_expires_at?: string | null;
 };
 
 const LEVELS = ["Prospective (JAMB)", "100L", "200L", "300L", "400L", "500L", "600L", "Graduate"];
@@ -259,8 +264,13 @@ function ProfilePage() {
                 <div className="text-xs font-medium uppercase tracking-widest text-primary">
                   Academic profile
                 </div>
-                <h1 className="mt-1 font-display text-2xl font-semibold md:text-3xl truncate">
+                <h1 className="mt-1 font-display text-2xl font-semibold md:text-3xl truncate flex items-center gap-2 flex-wrap">
                   {profile?.display_name || user?.email?.split("@")[0] || "Your profile"}
+                  {profile?.subscription_tier && profile.subscription_tier !== "free" && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-amber-200 shadow-sm animate-pulse">
+                      <Crown className="h-3 w-3" /> {tierLabel(profile.subscription_tier)}
+                    </span>
+                  )}
                 </h1>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/40 px-2.5 py-1">
@@ -434,6 +444,12 @@ function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Premium status banner */}
+        <PremiumBanner
+          tier={profile?.subscription_tier ?? "free"}
+          expiresAt={profile?.subscription_expires_at ?? null}
+        />
 
         {/* Stat strip */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -816,6 +832,102 @@ function DetailModal({
               </li>
             ))}
           </ol>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PremiumBanner({ tier, expiresAt }: { tier: string; expiresAt: string | null }) {
+  const isPremium = tier && tier !== "free";
+  const daysLeft = expiresAt
+    ? Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  if (!isPremium) {
+    return (
+      <div className="mt-6 glass relative overflow-hidden rounded-3xl p-5 md:p-6">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-500/15 blur-3xl" />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg">
+              <Crown className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="font-display text-lg font-semibold">You're on the Free plan</div>
+              <div className="text-sm text-muted-foreground">
+                Read-to-earn XP, predictors and CGPA tools stay free — unlock unlimited AI chat, PDF flashcards and Professor Access with Pro.
+              </div>
+            </div>
+          </div>
+          <Link
+            to="/upgrade"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:opacity-95"
+          >
+            <Zap className="h-4 w-4" /> Upgrade
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isProfessor = tier === "lecturer";
+  return (
+    <div
+      className={`mt-6 glass relative overflow-hidden rounded-3xl p-5 md:p-6 ring-1 ${
+        isProfessor ? "ring-amber-400/40" : "ring-primary/40"
+      }`}
+    >
+      <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-amber-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+      <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3">
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg ${
+              isProfessor
+                ? "bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500"
+                : "bg-gradient-to-br from-primary to-accent"
+            }`}
+          >
+            <Crown className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xl font-semibold">
+                {tierLabel(tier)} member
+              </span>
+              <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                Active
+              </span>
+            </div>
+            <div className="mt-0.5 text-sm text-muted-foreground">
+              {isProfessor
+                ? "Professor Access unlocked — human-style worked examples & syllabus mapping."
+                : "Pro unlocked — unlimited AI Study Buddy, flashcards & PDF chat."}
+            </div>
+            {daysLeft !== null && (
+              <div className="mt-2 text-xs">
+                <span className={daysLeft <= 7 ? "text-amber-300" : "text-muted-foreground"}>
+                  {daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining` : "Expired"}
+                  {expiresAt && ` · renews / ends ${new Date(expiresAt).toLocaleDateString()}`}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/chat"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Open chat
+          </Link>
+          <Link
+            to="/upgrade"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-4 py-2 text-xs font-medium hover:bg-accent/20"
+          >
+            Manage plan
+          </Link>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { Sparkles, LogOut, Search, Menu, X, ShieldCheck, Crown } from "lucide-re
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { tierLabel } from "@/lib/payments-config";
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -107,7 +108,7 @@ export function SiteHeader() {
               )}
               {tier !== "free" && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
-                  <Crown className="h-3 w-3" /> {tier}
+                  <Crown className="h-3 w-3" /> {tierLabel(tier)}
                 </span>
               )}
               <span className="hidden text-sm text-muted-foreground xl:inline">

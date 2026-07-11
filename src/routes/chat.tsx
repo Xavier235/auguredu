@@ -317,15 +317,18 @@ function ChatPage() {
                       </div>
                     </button>
                   ))}
-                  <div className="flex items-start gap-2 rounded-xl border border-dashed border-border/60 p-2.5 text-left text-sm opacity-70">
-                    <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Link
+                    to="/upgrade"
+                    className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/5 p-2.5 text-left text-sm hover:border-amber-500/70 hover:bg-amber-500/10"
+                  >
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
                     <div>
-                      <div className="font-medium">Talk to a Lecturer</div>
+                      <div className="font-medium">Talk to a Professor</div>
                       <div className="text-xs text-muted-foreground">
-                        Premium — 10 requests/day. Coming soon.
+                        Premium — human-style worked examples & syllabus mapping.
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
 

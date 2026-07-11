@@ -17,10 +17,10 @@ export const Route = createFileRoute("/upgrade")({
       {
         name: "description",
         content:
-          "Unlock Augur Pro & Lecturer AI. Pay by bank transfer to our verified Nigerian account and upload your receipt for instant review.",
+          "Unlock Augur Pro & Professor Access. Pay by Opay bank transfer and upload your receipt for fast manual approval.",
       },
       { property: "og:title", content: "Upgrade — Augur.edu" },
-      { property: "og:description", content: "Bank-transfer payments for Nigerian students. Fast manual approval." },
+      { property: "og:description", content: "Naira bank-transfer payments for Nigerian students. Fast manual approval." },
     ],
   }),
   component: UpgradePage,
@@ -78,23 +78,66 @@ function UpgradePage() {
     }
   }
 
+  const ALLOWED_MIME = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+    "application/pdf",
+  ];
+  const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif|pdf)$/i;
+  const MAX_BYTES = 10 * 1024 * 1024;
+  const MIN_BYTES = 2 * 1024;
+
+  function validateFile(f: File | null): string | null {
+    if (!f) return "Please attach your payment receipt (screenshot or PDF).";
+    if (!ALLOWED_EXT.test(f.name)) return "Unsupported file type. Use PNG, JPG, WEBP, HEIC or PDF.";
+    if (f.type && !ALLOWED_MIME.includes(f.type)) {
+      return "Unsupported file type. Use PNG, JPG, WEBP, HEIC or PDF.";
+    }
+    if (f.size > MAX_BYTES) return "Receipt is too large — must be under 10 MB.";
+    if (f.size < MIN_BYTES) return "Receipt looks empty or too small (min 2 KB).";
+    return null;
+  }
+
+  function onPickFile(f: File | null) {
+    if (!f) { setFile(null); return; }
+    const err = validateFile(f);
+    if (err) { toast.error(err); if (fileRef.current) fileRef.current.value = ""; return; }
+    setFile(f);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    if (!file) {
-      toast.error("Please attach your payment receipt (screenshot or PDF)");
+
+    const trimmedSender = senderName.trim();
+    if (!trimmedSender || trimmedSender.length < 2) {
+      toast.error("Enter the name on the transfer (min 2 characters) so we can match it.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Receipt must be under 10 MB");
+    if (trimmedSender.length > 120) {
+      toast.error("Sender name is too long (max 120 characters).");
       return;
     }
+    if (!/^[\p{L}\p{M}'\-.\s]+$/u.test(trimmedSender)) {
+      toast.error("Sender name has invalid characters — letters, spaces, ' and - only.");
+      return;
+    }
+    if (note.length > 500) {
+      toast.error("Note is too long (max 500 characters).");
+      return;
+    }
+    const fileErr = validateFile(file);
+    if (fileErr) { toast.error(fileErr); return; }
+
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
+      const ext = (file!.name.split(".").pop() || "png").toLowerCase();
       const path = `${user.id}/${Date.now()}-${plan}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("receipts").upload(path, file, {
-        contentType: file.type || "image/png",
+      const { error: upErr } = await supabase.storage.from("receipts").upload(path, file!, {
+        contentType: file!.type || "image/png",
         upsert: false,
       });
       if (upErr) throw upErr;
@@ -103,8 +146,8 @@ function UpgradePage() {
           plan,
           amountNaira: selected.priceNaira,
           receiptPath: path,
-          senderName: senderName || undefined,
-          note: note || undefined,
+          senderName: trimmedSender,
+          note: note.trim() || undefined,
         },
       });
       toast.success("Receipt submitted — you'll get access as soon as we verify (usually within a few hours).");
@@ -216,22 +259,30 @@ function UpgradePage() {
             <h2 className="mb-4 font-display text-xl font-bold">Step 2 · Upload receipt</h2>
 
             <label className="mb-3 block">
-              <span className="mb-1 block text-xs font-medium text-muted-foreground">Name on the transfer (optional)</span>
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">
+                Name on the transfer <span className="text-rose-400">*</span>
+              </span>
               <input
+                required
+                minLength={2}
+                maxLength={120}
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                placeholder="e.g. Adaeze O."
+                placeholder="e.g. Adaeze Okafor"
                 className="w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </label>
 
             <label className="mb-3 block">
-              <span className="mb-1 block text-xs font-medium text-muted-foreground">Note to admin (optional)</span>
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">
+                Note to admin (optional) · {note.length}/500
+              </span>
               <textarea
                 value={note}
-                onChange={(e) => setNote(e.target.value)}
+                onChange={(e) => setNote(e.target.value.slice(0, 500))}
                 placeholder="Anything we should know…"
                 rows={2}
+                maxLength={500}
                 className="w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </label>
@@ -240,18 +291,20 @@ function UpgradePage() {
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                accept=".png,.jpg,.jpeg,.webp,.heic,.heif,.pdf,image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"
+                onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                 className="hidden"
               />
               <Upload className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
-              <div className="text-sm font-medium">{file ? file.name : "Tap to attach receipt"}</div>
-              <div className="text-xs text-muted-foreground">Screenshot or PDF · up to 10 MB</div>
+              <div className="text-sm font-medium">
+                {file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : "Tap to attach receipt"}
+              </div>
+              <div className="text-xs text-muted-foreground">PNG · JPG · WEBP · HEIC · PDF — up to 10 MB</div>
             </label>
 
             <button
               type="submit"
-              disabled={uploading || !file}
+              disabled={uploading || !file || !senderName.trim()}
               className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
             >
               {uploading ? "Submitting…" : "Submit for review"}

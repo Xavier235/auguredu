@@ -4,12 +4,25 @@ import { z } from "zod";
 
 const planSchema = z.enum(["lecturer_monthly", "lecturer_yearly", "pro_monthly", "pro_yearly"]);
 
+// Only accept common receipt formats (matches storage path suffix)
+const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif|pdf)$/i;
+
 const submitSchema = z.object({
   plan: planSchema,
-  amountNaira: z.number().int().min(100).max(10_000_000),
-  receiptPath: z.string().min(3),
-  senderName: z.string().max(120).optional(),
-  note: z.string().max(500).optional(),
+  amountNaira: z.number().int().min(500, "Amount too low").max(10_000_000, "Amount too high"),
+  receiptPath: z
+    .string()
+    .min(6, "Missing receipt")
+    .max(400)
+    .regex(ALLOWED_EXT, "Receipt must be an image (PNG/JPG/WEBP/HEIC) or a PDF"),
+  senderName: z
+    .string()
+    .trim()
+    .min(2, "Sender name too short")
+    .max(120)
+    .regex(/^[\p{L}\p{M}'\-.\s]+$/u, "Sender name has invalid characters")
+    .optional(),
+  note: z.string().trim().max(500).optional(),
 });
 
 export const submitPaymentRequest = createServerFn({ method: "POST" })
@@ -17,6 +30,25 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => submitSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Enforce path ownership: receiptPath must live under this user's folder
+    if (!data.receiptPath.startsWith(`${userId}/`)) {
+      throw new Error("Invalid receipt path");
+    }
+
+    // Confirm the uploaded object actually exists in storage
+    const folder = data.receiptPath.substring(0, data.receiptPath.lastIndexOf("/"));
+    const filename = data.receiptPath.substring(data.receiptPath.lastIndexOf("/") + 1);
+    const { data: listing, error: listErr } = await (supabase as any).storage
+      .from("receipts")
+      .list(folder, { search: filename, limit: 1 });
+    if (listErr) throw new Error(listErr.message);
+    const obj = (listing ?? []).find((o: any) => o.name === filename);
+    if (!obj) throw new Error("Receipt file not found in storage");
+    const sizeBytes = obj?.metadata?.size ?? 0;
+    if (sizeBytes > 10 * 1024 * 1024) throw new Error("Receipt exceeds 10 MB limit");
+    if (sizeBytes > 0 && sizeBytes < 2 * 1024) throw new Error("Receipt looks empty or too small");
+
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
       .insert({
