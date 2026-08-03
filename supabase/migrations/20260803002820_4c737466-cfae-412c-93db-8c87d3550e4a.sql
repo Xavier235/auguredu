@@ -1,0 +1,11 @@
+REVOKE ALL ON FUNCTION public.apply_payment_approval() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.apply_student_verification() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.notify_payment_review() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.touch_updated_at() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.consume_quota(text, integer) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.my_usage_today() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.consume_quota(text, integer) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.my_usage_today() TO authenticated, service_role;
