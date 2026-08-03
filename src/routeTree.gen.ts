@@ -15,6 +15,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CgpaRouteImport } from './routes/cgpa'
@@ -53,6 +54,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PredictorRoute = PredictorRouteImport.update({
   id: '/predictor',
   path: '/predictor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRoute
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   CgpaRoute: typeof CgpaRoute
   ChatRoute: typeof ChatRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LibraryRoute: typeof LibraryRoute
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
@@ -267,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/predictor'
       fullPath: '/predictor'
       preLoaderRoute: typeof PredictorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   CgpaRoute: CgpaRoute,
   ChatRoute: ChatRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LibraryRoute: LibraryRoute,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
