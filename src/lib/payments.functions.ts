@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { makeReferenceCode, REFERENCE_REGEX } from "@/lib/payments-config";
 
 const planSchema = z.enum(["lecturer_monthly", "lecturer_yearly", "pro_monthly", "pro_yearly"]);
 
@@ -15,6 +16,7 @@ const submitSchema = z.object({
     .min(6, "Missing receipt")
     .max(400)
     .regex(ALLOWED_EXT, "Receipt must be an image (PNG/JPG/WEBP/HEIC) or a PDF"),
+  referenceCode: z.string().trim().toUpperCase().regex(REFERENCE_REGEX, "Invalid payment reference").optional(),
   senderName: z
     .string()
     .trim()
