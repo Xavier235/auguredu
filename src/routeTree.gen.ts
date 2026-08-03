@@ -15,13 +15,17 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CgpaRouteImport } from './routes/cgpa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
+import { Route as LibraryItemIdRouteImport } from './routes/library.$itemId'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as ApiVoiceTranscribeRouteImport } from './routes/api/voice/transcribe'
+import { Route as ApiVoiceSpeakRouteImport } from './routes/api/voice/speak'
 
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
@@ -51,6 +55,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PredictorRoute = PredictorRouteImport.update({
   id: '/predictor',
   path: '/predictor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -83,9 +92,24 @@ const ReadPdfIdRoute = ReadPdfIdRouteImport.update({
   path: '/read/$pdfId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryItemIdRoute = LibraryItemIdRouteImport.update({
+  id: '/$itemId',
+  path: '/$itemId',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   id: '/admin/payments',
   path: '/admin/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVoiceTranscribeRoute = ApiVoiceTranscribeRouteImport.update({
+  id: '/api/voice/transcribe',
+  path: '/api/voice/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVoiceSpeakRoute = ApiVoiceSpeakRouteImport.update({
+  id: '/api/voice/speak',
+  path: '/api/voice/speak',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -95,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -102,7 +127,10 @@ export interface FileRoutesByFullPath {
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/speak': typeof ApiVoiceSpeakRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +138,7 @@ export interface FileRoutesByTo {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -117,7 +146,10 @@ export interface FileRoutesByTo {
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/speak': typeof ApiVoiceSpeakRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -126,6 +158,7 @@ export interface FileRoutesById {
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
@@ -133,7 +166,10 @@ export interface FileRoutesById {
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/speak': typeof ApiVoiceSpeakRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,6 +179,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -150,7 +187,10 @@ export interface FileRouteTypes {
     | '/study-plan'
     | '/upgrade'
     | '/admin/payments'
+    | '/library/$itemId'
     | '/read/$pdfId'
+    | '/api/voice/speak'
+    | '/api/voice/transcribe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,6 +198,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -165,7 +206,10 @@ export interface FileRouteTypes {
     | '/study-plan'
     | '/upgrade'
     | '/admin/payments'
+    | '/library/$itemId'
     | '/read/$pdfId'
+    | '/api/voice/speak'
+    | '/api/voice/transcribe'
   id:
     | '__root__'
     | '/'
@@ -173,6 +217,7 @@ export interface FileRouteTypes {
     | '/cgpa'
     | '/chat'
     | '/how-it-works'
+    | '/library'
     | '/predictor'
     | '/profile'
     | '/search'
@@ -180,7 +225,10 @@ export interface FileRouteTypes {
     | '/study-plan'
     | '/upgrade'
     | '/admin/payments'
+    | '/library/$itemId'
     | '/read/$pdfId'
+    | '/api/voice/speak'
+    | '/api/voice/transcribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,6 +237,7 @@ export interface RootRouteChildren {
   CgpaRoute: typeof CgpaRoute
   ChatRoute: typeof ChatRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LibraryRoute: typeof LibraryRouteWithChildren
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
@@ -197,6 +246,8 @@ export interface RootRouteChildren {
   UpgradeRoute: typeof UpgradeRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   ReadPdfIdRoute: typeof ReadPdfIdRoute
+  ApiVoiceSpeakRoute: typeof ApiVoiceSpeakRoute
+  ApiVoiceTranscribeRoute: typeof ApiVoiceTranscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -243,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PredictorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
@@ -285,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReadPdfIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/$itemId': {
+      id: '/library/$itemId'
+      path: '/$itemId'
+      fullPath: '/library/$itemId'
+      preLoaderRoute: typeof LibraryItemIdRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/admin/payments': {
       id: '/admin/payments'
       path: '/admin/payments'
@@ -292,8 +357,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice/transcribe': {
+      id: '/api/voice/transcribe'
+      path: '/api/voice/transcribe'
+      fullPath: '/api/voice/transcribe'
+      preLoaderRoute: typeof ApiVoiceTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/voice/speak': {
+      id: '/api/voice/speak'
+      path: '/api/voice/speak'
+      fullPath: '/api/voice/speak'
+      preLoaderRoute: typeof ApiVoiceSpeakRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface LibraryRouteChildren {
+  LibraryItemIdRoute: typeof LibraryItemIdRoute
+}
+
+const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryItemIdRoute: LibraryItemIdRoute,
+}
+
+const LibraryRouteWithChildren =
+  LibraryRoute._addFileChildren(LibraryRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -301,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   CgpaRoute: CgpaRoute,
   ChatRoute: ChatRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LibraryRoute: LibraryRouteWithChildren,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
@@ -309,6 +400,8 @@ const rootRouteChildren: RootRouteChildren = {
   UpgradeRoute: UpgradeRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   ReadPdfIdRoute: ReadPdfIdRoute,
+  ApiVoiceSpeakRoute: ApiVoiceSpeakRoute,
+  ApiVoiceTranscribeRoute: ApiVoiceTranscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

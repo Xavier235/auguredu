@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { tierLabel } from "@/lib/payments-config";
+import { NotificationCenter } from "@/components/notification-center";
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -32,6 +33,7 @@ export function SiteHeader() {
     { to: "/predictor", label: "JAMB Predictor" },
     { to: "/cgpa", label: "CGPA" },
     { to: "/study-plan", label: "Study Plan" },
+    { to: "/library", label: "Library" },
     { to: "/chat", label: "Chat" },
     ...(user
       ? [
@@ -101,6 +103,7 @@ export function SiteHeader() {
         <div className="hidden md:block">
           {user ? (
             <div className="flex items-center gap-2">
+              <NotificationCenter />
               {verified && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
                   <ShieldCheck className="h-3 w-3" /> Verified student

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { makeReferenceCode, REFERENCE_REGEX } from "@/lib/payments-config";
 
 const planSchema = z.enum(["lecturer_monthly", "lecturer_yearly", "pro_monthly", "pro_yearly"]);
 
@@ -15,6 +16,7 @@ const submitSchema = z.object({
     .min(6, "Missing receipt")
     .max(400)
     .regex(ALLOWED_EXT, "Receipt must be an image (PNG/JPG/WEBP/HEIC) or a PDF"),
+  referenceCode: z.string().trim().toUpperCase().regex(REFERENCE_REGEX, "Invalid payment reference").optional(),
   senderName: z
     .string()
     .trim()
@@ -49,6 +51,8 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
     if (sizeBytes > 10 * 1024 * 1024) throw new Error("Receipt exceeds 10 MB limit");
     if (sizeBytes > 0 && sizeBytes < 2 * 1024) throw new Error("Receipt looks empty or too small");
 
+    const reference = data.referenceCode ?? makeReferenceCode(userId);
+
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
       .insert({
@@ -56,6 +60,7 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
         plan: data.plan,
         amount_naira: data.amountNaira,
         receipt_path: data.receiptPath,
+        reference_code: reference,
         sender_name: data.senderName ?? null,
         note: data.note ?? null,
         status: "pending",
@@ -63,7 +68,33 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
+
+    await (supabase as any).from("notifications").insert({
+      user_id: userId,
+      kind: "payment",
+      title: "Receipt submitted",
+      body: `Reference ${reference} is now pending review. You'll be notified once it's approved.`,
+      href: "/upgrade",
+    });
+
     return row;
+  });
+
+/** Admin helper: look up a submission by its payment reference code. */
+export const findPaymentByReference = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ reference: z.string().trim().toUpperCase().max(32) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data: rows, error } = await (context.supabase as any)
+      .from("payment_requests")
+      .select("*")
+      .eq("reference_code", data.reference)
+      .limit(5);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as any[];
   });
 
 export const listMyPaymentRequests = createServerFn({ method: "GET" })
