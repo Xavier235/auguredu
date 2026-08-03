@@ -22,6 +22,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as ApiVoiceTranscribeRouteImport } from './routes/api/voice/transcribe'
 
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
@@ -88,6 +89,11 @@ const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   path: '/admin/payments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoiceTranscribeRoute = ApiVoiceTranscribeRouteImport.update({
+  id: '/api/voice/transcribe',
+  path: '/api/voice/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/upgrade': typeof UpgradeRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
+  '/api/voice/transcribe': typeof ApiVoiceTranscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/upgrade'
     | '/admin/payments'
     | '/read/$pdfId'
+    | '/api/voice/transcribe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/upgrade'
     | '/admin/payments'
     | '/read/$pdfId'
+    | '/api/voice/transcribe'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/upgrade'
     | '/admin/payments'
     | '/read/$pdfId'
+    | '/api/voice/transcribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   UpgradeRoute: typeof UpgradeRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   ReadPdfIdRoute: typeof ReadPdfIdRoute
+  ApiVoiceTranscribeRoute: typeof ApiVoiceTranscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice/transcribe': {
+      id: '/api/voice/transcribe'
+      path: '/api/voice/transcribe'
+      fullPath: '/api/voice/transcribe'
+      preLoaderRoute: typeof ApiVoiceTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   UpgradeRoute: UpgradeRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   ReadPdfIdRoute: ReadPdfIdRoute,
+  ApiVoiceTranscribeRoute: ApiVoiceTranscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
