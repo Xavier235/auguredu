@@ -4,12 +4,33 @@
 export const BANK_DETAILS = {
   bankName: "Opay",
   accountName: "Ayinde Adebola Temiloluwa",
-  accountNumber: "TO BE PROVIDED", // Reply with the 10-digit Opay account number to fill this in
+  accountNumber: "9067859562",
   altLabel: "Also",
   altValue: "Opay transfers accepted",
 };
 
 export type PlanId = "lecturer_monthly" | "lecturer_yearly" | "pro_monthly" | "pro_yearly";
+
+// ---- Payment reference IDs -------------------------------------------------
+// Students put this code in the bank transfer narration so an admin can match
+// a transfer to a submission instantly.
+export const REFERENCE_REGEX = /^AUG-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+
+const REF_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1 confusion
+
+export function makeReferenceCode(userId: string) {
+  const seed = userId.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  let userPart = "";
+  for (let i = 0; i < 4; i++) {
+    const ch = seed[i] ?? "X";
+    userPart += REF_ALPHABET.includes(ch) ? ch : REF_ALPHABET[ch.charCodeAt(0) % REF_ALPHABET.length];
+  }
+  let rand = "";
+  for (let i = 0; i < 4; i++) {
+    rand += REF_ALPHABET[Math.floor(Math.random() * REF_ALPHABET.length)];
+  }
+  return `AUG-${userPart}-${rand}`;
+}
 
 export const PLANS: Record<
   PlanId,
