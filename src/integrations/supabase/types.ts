@@ -117,6 +117,81 @@ export type Database = {
           },
         ]
       }
+      library_reads: {
+        Row: {
+          created_at: string
+          department: string | null
+          id: string
+          item_id: string
+          item_title: string
+          level: string | null
+          quiz_score: number
+          seconds_read: number
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          item_id: string
+          item_title: string
+          level?: string | null
+          quiz_score?: number
+          seconds_read?: number
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          item_id?: string
+          item_title?: string
+          level?: string | null
+          quiz_score?: number
+          seconds_read?: number
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          href: string | null
+          id: string
+          kind: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           admin_notes: string | null
@@ -126,6 +201,7 @@ export type Database = {
           note: string | null
           plan: string
           receipt_path: string
+          reference_code: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           sender_name: string | null
@@ -141,6 +217,7 @@ export type Database = {
           note?: string | null
           plan: string
           receipt_path: string
+          reference_code?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sender_name?: string | null
@@ -156,6 +233,7 @@ export type Database = {
           note?: string | null
           plan?: string
           receipt_path?: string
+          reference_code?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sender_name?: string | null
