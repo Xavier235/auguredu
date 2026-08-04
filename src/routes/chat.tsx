@@ -12,7 +12,10 @@ import {
   listMessages,
   sendChatMessage,
   generateFlashcardsFromAttachment,
+  CHAT_MODES,
+  type ChatMode,
 } from "@/lib/chat.functions";
+import { cleanAugurText } from "@/lib/text-clean";
 import {
   Send,
   Plus,
@@ -84,6 +87,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<ChatMode>("study-buddy");
   const [uploading, setUploading] = useState(false);
   const [pendingAttachment, setPendingAttachment] = useState<
     { path: string; name: string; mimeType: string } | null
@@ -189,7 +193,7 @@ function ChatPage() {
 
     try {
       await send({
-        data: { threadId, content: contentToSend, attachments: attToSend },
+        data: { threadId, content: contentToSend, attachments: attToSend, mode },
       });
       // Reload messages fresh (gets real IDs + signed URLs)
       const fresh = await loadMsgs({ data: { threadId } });
@@ -417,6 +421,22 @@ function ChatPage() {
                   </div>
                 </div>
               )}
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                      mode === m
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
+                    }`}
+                  >
+                    {CHAT_MODES[m]}
+                  </button>
+                ))}
+              </div>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -548,7 +568,7 @@ function Bubble({ m }: { m: Message }) {
           </div>
         )}
         <div className="whitespace-pre-wrap break-words leading-relaxed">
-          {m.content.split("\n").map((line, i) => (
+          {cleanAugurText(m.content).split("\n").map((line, i) => (
             <div key={i}>{renderContent(line)}</div>
           ))}
         </div>
