@@ -249,7 +249,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       messages.push({ role: h.role, content: parts.length > 1 ? parts : h.content });
     }
 
-    const assistantContent = await callGateway(messages);
+    const assistantContent = cleanAugurText(await callGateway(messages));
 
     // Save assistant reply
     const { error: aErr } = await (supabase as any).from("chat_messages_v2").insert({
