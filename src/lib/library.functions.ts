@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { getLibraryItem } from "@/lib/library";
+import { getLibraryEntry } from "@/lib/library-catalogue";
 
 const verifySchema = z.object({
   itemId: z.string().min(2).max(120),
