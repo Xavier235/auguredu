@@ -32,8 +32,20 @@ export const verifyLibraryRead = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => verifySchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const item = getLibraryItem(data.itemId);
-    if (!item) throw new Error("Unknown library item");
+    const curated = getLibraryItem(data.itemId);
+    const entry = curated ? null : getLibraryEntry(data.itemId);
+    if (!curated && !entry) throw new Error("Unknown library item");
+    const item = (curated ?? {
+      id: entry!.id,
+      title: entry!.title,
+      courseCode: entry!.code,
+      department: entry!.department,
+      level: entry!.level,
+      minutes: entry!.minutes,
+      xp: entry!.xp,
+      premium: false,
+    }) as any;
+
 
     // Premium material is gated by subscription tier.
     if (item.premium) {
