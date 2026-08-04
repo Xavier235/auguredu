@@ -87,6 +87,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<ChatMode>("study-buddy");
   const [uploading, setUploading] = useState(false);
   const [pendingAttachment, setPendingAttachment] = useState<
     { path: string; name: string; mimeType: string } | null
