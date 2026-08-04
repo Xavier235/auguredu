@@ -480,10 +480,12 @@ export const askLecturer = createServerFn({ method: "POST" })
       attachments: [],
     });
 
-    const reply = await callGateway([
-      { role: "system", content: LECTURER_PROMPT },
-      { role: "user", content: data.question },
-    ]);
+    const reply = cleanAugurText(
+      await callGateway([
+        { role: "system", content: `${LECTURER_PROMPT}\n\n${todayLine()}${libraryHint(data.question)}` },
+        { role: "user", content: data.question },
+      ]),
+    );
 
     await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
