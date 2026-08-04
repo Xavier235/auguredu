@@ -12,7 +12,10 @@ import {
   listMessages,
   sendChatMessage,
   generateFlashcardsFromAttachment,
+  CHAT_MODES,
+  type ChatMode,
 } from "@/lib/chat.functions";
+import { cleanAugurText } from "@/lib/text-clean";
 import {
   Send,
   Plus,
