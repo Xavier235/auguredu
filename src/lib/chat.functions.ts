@@ -190,6 +190,9 @@ const sendSchema = z.object({
       }),
     )
     .default([]),
+  mode: z
+    .enum(["study-buddy", "drill", "blueprint", "paper", "pastq"])
+    .default("study-buddy"),
 });
 
 export const sendChatMessage = createServerFn({ method: "POST" })
