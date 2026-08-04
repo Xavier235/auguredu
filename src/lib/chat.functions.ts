@@ -228,7 +228,10 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true })
       .limit(30);
 
-    const messages: ChatMsg[] = [{ role: "system", content: SYSTEM_PROMPT }];
+    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], libraryHint(data.content)]
+      .filter(Boolean)
+      .join("\n\n");
+    const messages: ChatMsg[] = [{ role: "system", content: systemContent }];
     for (const h of (history as any[]) ?? []) {
       const parts: Array<Record<string, unknown>> = [{ type: "text", text: h.content }];
       if (Array.isArray(h.attachments)) {
