@@ -193,7 +193,7 @@ function ChatPage() {
 
     try {
       await send({
-        data: { threadId, content: contentToSend, attachments: attToSend },
+        data: { threadId, content: contentToSend, attachments: attToSend, mode },
       });
       // Reload messages fresh (gets real IDs + signed URLs)
       const fresh = await loadMsgs({ data: { threadId } });
