@@ -568,7 +568,7 @@ function Bubble({ m }: { m: Message }) {
           </div>
         )}
         <div className="whitespace-pre-wrap break-words leading-relaxed">
-          {m.content.split("\n").map((line, i) => (
+          {cleanAugurText(m.content).split("\n").map((line, i) => (
             <div key={i}>{renderContent(line)}</div>
           ))}
         </div>
