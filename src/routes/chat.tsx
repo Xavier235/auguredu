@@ -417,6 +417,22 @@ function ChatPage() {
                   </div>
                 </div>
               )}
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                      mode === m
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
+                    }`}
+                  >
+                    {CHAT_MODES[m]}
+                  </button>
+                ))}
+              </div>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
