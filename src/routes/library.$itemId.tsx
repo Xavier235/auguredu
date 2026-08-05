@@ -152,8 +152,17 @@ function LibraryReader() {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-transparent">
+        <div
+          className="h-full bg-gradient-to-r from-primary to-accent transition-[width] duration-150"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <div className="fixed bottom-4 right-4 z-40 rounded-full border border-border bg-background/90 px-3 py-1.5 text-[11px] font-medium shadow-lg backdrop-blur">
+          {progress}% read · {Math.floor(seconds / 60)}m {seconds % 60}s
+        </div>
         <Link
           to="/library"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
