@@ -63,7 +63,7 @@ function LibraryReader() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [itemId, sectionsKey]);
+  }, [itemId, generated]);
 
   useEffect(() => {
     started.current = Date.now();
