@@ -69,10 +69,11 @@ export function LibraryReadingLog() {
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-6 grid grid-cols-2 gap-3 text-center md:grid-cols-4">
             <Stat label="Verified reads" value={stats.verified} />
             <Stat label="Minutes read" value={stats.minutes} />
             <Stat label="Avg check score" value={`${stats.avg}%`} />
+            <Stat label="Reading streak" value={`${stats.streak}d`} />
           </div>
 
           <div className="mt-5 space-y-2">
