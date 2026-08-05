@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LibraryReadingLog } from "@/components/library-reading-log";
 import {
   buildStudyPlan,
   classify,
@@ -252,6 +253,8 @@ function StudyPlanPage() {
             </div>
           </div>
         </section>
+
+        <LibraryReadingLog />
 
         {/* Inputs + plan */}
         <section className="grid gap-6 lg:grid-cols-5">
