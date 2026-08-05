@@ -53,6 +53,17 @@ function LibraryReader() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const needsGeneration = !curated && !!entry;
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    function onScroll() {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(h > 0 ? Math.min(100, Math.round((window.scrollY / h) * 100)) : 0);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [itemId, sectionsKey]);
 
   useEffect(() => {
     started.current = Date.now();
