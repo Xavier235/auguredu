@@ -451,6 +451,14 @@ function ProfilePage() {
           expiresAt={profile?.subscription_expires_at ?? null}
         />
 
+        <ReadingBadges
+          premiumActive={
+            (profile?.subscription_tier ?? "free") !== "free" &&
+            (!profile?.subscription_expires_at ||
+              new Date(profile.subscription_expires_at).getTime() > Date.now())
+          }
+        />
+
         {/* Stat strip */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <BigStat icon={<Sparkles className="h-4 w-4" />} label="Predictions" value={`${stats.count}`} />
