@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyLibraryReads } from "@/lib/library.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { readingStats } from "@/lib/reading-milestones";
 import { BookOpen, CheckCircle2, Clock, Library, ArrowRight } from "lucide-react";
 
 type Read = {
@@ -35,12 +36,8 @@ export function LibraryReadingLog() {
   }, [user?.id]);
 
   const stats = useMemo(() => {
-    const verified = reads.filter((r) => r.verified);
-    const minutes = Math.round(reads.reduce((n, r) => n + (r.seconds_read ?? 0), 0) / 60);
-    const avg = verified.length
-      ? Math.round(verified.reduce((n, r) => n + (r.quiz_score ?? 0), 0) / verified.length)
-      : 0;
-    return { verified: verified.length, minutes, avg };
+    const s = readingStats(reads as any);
+    return { verified: s.verifiedCount, minutes: s.minutes, avg: s.avgScore, streak: s.currentStreak };
   }, [reads]);
 
   return (
@@ -69,10 +66,11 @@ export function LibraryReadingLog() {
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-6 grid grid-cols-2 gap-3 text-center md:grid-cols-4">
             <Stat label="Verified reads" value={stats.verified} />
             <Stat label="Minutes read" value={stats.minutes} />
             <Stat label="Avg check score" value={`${stats.avg}%`} />
+            <Stat label="Reading streak" value={`${stats.streak}d`} />
           </div>
 
           <div className="mt-5 space-y-2">
