@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyLibraryReads } from "@/lib/library.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { readingStats } from "@/lib/reading-milestones";
 import { BookOpen, CheckCircle2, Clock, Library, ArrowRight } from "lucide-react";
 
 type Read = {
