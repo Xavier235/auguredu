@@ -1,3 +1,4 @@
+import { pageMeta, canonical, courseJsonLd } from "@/lib/seo";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
