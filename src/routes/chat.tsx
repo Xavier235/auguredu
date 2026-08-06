@@ -1,3 +1,4 @@
+import { pageMeta, canonical, serviceJsonLd } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -16,6 +17,7 @@ import {
   type ChatMode,
 } from "@/lib/chat.functions";
 import { cleanAugurText } from "@/lib/text-clean";
+import { MicButton, SpeakButton } from "@/components/voice";
 import {
   Send,
   Plus,
@@ -38,20 +40,22 @@ const searchSchema = z.object({ t: z.string().uuid().optional() });
 export const Route = createFileRoute("/chat")({
   validateSearch: searchSchema,
   head: () => ({
-    meta: [
-      { title: "Augur AI — Your Nigerian University Study Buddy" },
-      {
-        name: "description",
-        content:
-          "Chat with Augur AI: get help with JAMB, coursework and study plans. Upload PDFs to auto-generate flashcards and earn XP by reading.",
-      },
-      { property: "og:title", content: "Augur AI Chat" },
-      {
-        property: "og:description",
-        content: "AI study buddy for Nigerian students. PDF flashcards, course guidance, and read-to-earn rewards.",
-      },
-    ],
+    meta: pageMeta({
+      title: "Augur AI — Nigerian University Study Buddy",
+      description:
+        "Ask Augur AI about JAMB, coursework and study plans by text or voice, upload PDFs for flashcards and earn reading XP.",
+      path: "/chat",
+    }),
+    links: canonical("/chat"),
+    scripts: serviceJsonLd({
+      name: "Augur AI Study Buddy",
+      serviceType: "AI tutoring",
+      description:
+        "AI tutoring for Nigerian students covering JAMB drills, coursework explanations, past questions and study blueprints.",
+      path: "/chat",
+    }),
   }),
+
   component: ChatPage,
 });
 
@@ -460,10 +464,14 @@ function ChatPage() {
                 >
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
                 </button>
+                <MicButton
+                  disabled={sending}
+                  onTranscript={(t) => setInput((cur) => (cur ? `${cur} ${t}` : t))}
+                />
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask Augur anything (or attach a PDF / image)…"
+                  placeholder="Ask Augur anything, type, speak or attach a PDF…"
                   rows={1}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -505,7 +513,7 @@ function EmptyHint({ activeRoom }: { activeRoom: string }) {
       <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
         <room.icon className="h-6 w-6" />
       </div>
-      <h3 className="font-display text-lg font-semibold">{room.label}</h3>
+      <h2 className="font-display text-lg font-semibold">{room.label}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{room.desc}</p>
       <div className="mt-6 grid gap-2">
         {suggestions.map((s) => (
@@ -572,6 +580,7 @@ function Bubble({ m }: { m: Message }) {
             <div key={i}>{renderContent(line)}</div>
           ))}
         </div>
+        {!mine && m.content.trim().length > 0 && <SpeakButton text={cleanAugurText(m.content)} />}
       </div>
     </div>
   );

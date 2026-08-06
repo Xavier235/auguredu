@@ -1,3 +1,4 @@
+import { pageMeta, canonical } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -13,17 +14,15 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/search")({
   validateSearch: searchSchema,
   head: ({ match }) => ({
-    meta: [
-      {
-        title: match.search.q ? `Search: ${match.search.q} — Augur` : "Search — Augur",
-      },
-      {
-        name: "description",
-        content:
-          "Search Augur for tools, Nigerian university courses, professors and campuses. Live autocomplete — share URLs like /search?q=jamb.",
-      },
-    ],
+    meta: pageMeta({
+      title: match.search.q ? `Search: ${match.search.q} | Augur.edu` : "Search Courses & Tools | Augur.edu",
+      description:
+        "Search Augur for study tools, Nigerian university courses, professors and campuses with live autocomplete.",
+      path: "/search",
+    }),
+    links: canonical("/search"),
   }),
+
   component: SearchPage,
 });
 

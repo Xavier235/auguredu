@@ -13,6 +13,7 @@ import { KeyRound, LogOut, Mail, ShieldCheck, ArrowLeft } from "lucide-react";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Account settings — Augur.edu" },
       { name: "description", content: "Update your password, manage your account and sign out." },
     ],

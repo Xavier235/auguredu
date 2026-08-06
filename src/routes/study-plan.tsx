@@ -1,3 +1,4 @@
+import { pageMeta, canonical, serviceJsonLd } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
@@ -29,21 +30,21 @@ import {
 
 export const Route = createFileRoute("/study-plan")({
   head: () => ({
-    meta: [
-      { title: "Personal Study Workflow — Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Get a weekly study plan tuned to your target CGPA, attendance and sleep. Build a streak — earn rewards as you log each day.",
-      },
-      { property: "og:title", content: "Personal Study Workflow — Augur.edu" },
-      {
-        property: "og:description",
-        content:
-          "Hit your CGPA target with a daily study workflow, streaks and milestone rewards.",
-      },
-    ],
+    meta: pageMeta({
+      title: "Personal Study Workflow & Streaks | Augur.edu",
+      description:
+        "Build a weekly study plan tuned to your target CGPA, log daily sessions, keep a streak and track every course you have read.",
+      path: "/study-plan",
+    }),
+    links: canonical("/study-plan"),
+    scripts: serviceJsonLd({
+      name: "Personal Study Workflow",
+      serviceType: "Study planning",
+      description: "Weekly study planning, streak tracking and verified reading logs for Nigerian students.",
+      path: "/study-plan",
+    }),
   }),
+
   component: StudyPlanPage,
 });
 
@@ -330,9 +331,9 @@ function StudyPlanPage() {
             </div>
 
             <div className="glass rounded-3xl p-6">
-              <h3 className="font-display text-lg font-semibold">
+              <h2 className="font-display text-lg font-semibold">
                 Your week, mapped out
-              </h3>
+              </h2>
               <div className="mt-4 space-y-2">
                 {plan.dailyBreakdown.map((d) => (
                   <div

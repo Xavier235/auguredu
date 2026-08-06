@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { pageMeta, canonical, organisationJsonLd } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -13,20 +14,16 @@ import {
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "Augur.edu — Smart Academic Predictor" },
-      {
-        name: "description",
-        content:
-          "Predict your future grades, college admit chances, and the majors that fit you best — in under a minute.",
-      },
-      { property: "og:title", content: "Augur.edu — Smart Academic Predictor" },
-      {
-        property: "og:description",
-        content: "Predict grades, admit odds, and best-fit majors in 60 seconds.",
-      },
-    ],
+    meta: pageMeta({
+      title: "Augur.edu — Nigerian Admission & CGPA Predictor",
+      description:
+        "Predict your admission chances at any Nigerian university, forecast your CGPA and study every NUC course with an AI study buddy.",
+      path: "/",
+    }),
+    links: canonical("/"),
+    scripts: organisationJsonLd(),
   }),
+
   component: Home,
 });
 

@@ -6,6 +6,8 @@ import { LIBRARY_INDEX } from "@/lib/library-catalogue";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
+// Professor Access runs on the stronger Gemini Pro model for accuracy.
+const PROFESSOR_MODEL = "google/gemini-3.1-pro-preview";
 
 function todayLine() {
   const now = new Date();
@@ -92,7 +94,7 @@ type ChatMsg = {
   content: string | Array<Record<string, unknown>>;
 };
 
-async function callGateway(messages: ChatMsg[]): Promise<string> {
+async function callGateway(messages: ChatMsg[], model: string = MODEL): Promise<string> {
   const key = process.env.LOVABLE_API_KEY;
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
   const res = await fetch(GATEWAY, {
@@ -101,7 +103,7 @@ async function callGateway(messages: ChatMsg[]): Promise<string> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${key}`,
     },
-    body: JSON.stringify({ model: MODEL, messages }),
+    body: JSON.stringify({ model, messages }),
   });
   if (!res.ok) {
     const text = await res.text();
@@ -484,7 +486,7 @@ export const askLecturer = createServerFn({ method: "POST" })
       await callGateway([
         { role: "system", content: `${LECTURER_PROMPT}\n\n${todayLine()}${libraryHint(data.question)}` },
         { role: "user", content: data.question },
-      ]),
+      ], PROFESSOR_MODEL),
     );
 
     await (supabase as any).from("chat_messages_v2").insert({

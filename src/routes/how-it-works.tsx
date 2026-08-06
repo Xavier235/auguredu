@@ -1,3 +1,4 @@
+import { pageMeta, canonical } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -5,20 +6,15 @@ import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
-    meta: [
-      { title: "How it works — Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Inside the Augur model: the signals, the weights, and how grade, admission, and major predictions are built.",
-      },
-      { property: "og:title", content: "How it works — Augur.edu" },
-      {
-        property: "og:description",
-        content: "The signals and weights powering Augur's academic predictions.",
-      },
-    ],
+    meta: pageMeta({
+      title: "How Augur Predicts Your Results | Augur.edu",
+      description:
+        "Inside the Augur model: the signals, the weights and how admission, CGPA and course-fit predictions are calculated.",
+      path: "/how-it-works",
+    }),
+    links: canonical("/how-it-works"),
   }),
+
   component: HowPage,
 });
 

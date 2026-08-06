@@ -39,6 +39,7 @@ import type { PredictorInput, PredictorResult } from "@/lib/predictor";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "My profile — Augur.edu" },
       {
         name: "description",

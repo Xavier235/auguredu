@@ -16,6 +16,7 @@ export const Route = createFileRoute("/read/$pdfId")({
   },
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Read & Earn — Augur" },
       {
         name: "description",
