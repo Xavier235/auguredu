@@ -513,7 +513,7 @@ function EmptyHint({ activeRoom }: { activeRoom: string }) {
       <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
         <room.icon className="h-6 w-6" />
       </div>
-      <h3 className="font-display text-lg font-semibold">{room.label}</h3>
+      <h2 className="font-display text-lg font-semibold">{room.label}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{room.desc}</p>
       <div className="mt-6 grid gap-2">
         {suggestions.map((s) => (
