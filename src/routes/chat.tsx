@@ -17,6 +17,7 @@ import {
   type ChatMode,
 } from "@/lib/chat.functions";
 import { cleanAugurText } from "@/lib/text-clean";
+import { MicButton, SpeakButton } from "@/components/voice";
 import {
   Send,
   Plus,
@@ -463,10 +464,14 @@ function ChatPage() {
                 >
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
                 </button>
+                <MicButton
+                  disabled={sending}
+                  onTranscript={(t) => setInput((cur) => (cur ? `${cur} ${t}` : t))}
+                />
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask Augur anything (or attach a PDF / image)…"
+                  placeholder="Ask Augur anything, type, speak or attach a PDF…"
                   rows={1}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -575,6 +580,7 @@ function Bubble({ m }: { m: Message }) {
             <div key={i}>{renderContent(line)}</div>
           ))}
         </div>
+        {!mine && m.content.trim().length > 0 && <SpeakButton text={cleanAugurText(m.content)} />}
       </div>
     </div>
   );
