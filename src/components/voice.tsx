@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
-async function authHeader() {
+async function authHeader(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
 
 /** Hold-free mic button: tap to record, tap again to transcribe into the composer. */
 export function MicButton({
