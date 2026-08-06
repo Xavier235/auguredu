@@ -1,3 +1,4 @@
+import { pageMeta, canonical, serviceJsonLd } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { jsPDF } from "jspdf";

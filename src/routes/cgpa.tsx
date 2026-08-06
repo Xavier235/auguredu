@@ -1,3 +1,4 @@
+import { pageMeta, canonical, serviceJsonLd } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
