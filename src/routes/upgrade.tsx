@@ -12,17 +12,15 @@ import { Copy, Upload, Check, Clock, X as XIcon, Crown, ShieldCheck, ArrowRight 
 
 export const Route = createFileRoute("/upgrade")({
   head: () => ({
-    meta: [
-      { title: "Upgrade to Premium — Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Unlock Augur Pro & Professor Access. Pay by Opay bank transfer and upload your receipt for fast manual approval.",
-      },
-      { property: "og:title", content: "Upgrade — Augur.edu" },
-      { property: "og:description", content: "Naira bank-transfer payments for Nigerian students. Fast manual approval." },
-    ],
+    meta: pageMeta({
+      title: "Upgrade to Augur Premium — Pay in Naira",
+      description:
+        "Unlock Augur Pro and Professor Access. Pay by Opay bank transfer in naira and upload your receipt for fast approval.",
+      path: "/upgrade",
+    }),
+    links: canonical("/upgrade"),
   }),
+
   component: UpgradePage,
 });
 

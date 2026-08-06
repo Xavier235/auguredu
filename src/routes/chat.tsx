@@ -38,20 +38,22 @@ const searchSchema = z.object({ t: z.string().uuid().optional() });
 export const Route = createFileRoute("/chat")({
   validateSearch: searchSchema,
   head: () => ({
-    meta: [
-      { title: "Augur AI — Your Nigerian University Study Buddy" },
-      {
-        name: "description",
-        content:
-          "Chat with Augur AI: get help with JAMB, coursework and study plans. Upload PDFs to auto-generate flashcards and earn XP by reading.",
-      },
-      { property: "og:title", content: "Augur AI Chat" },
-      {
-        property: "og:description",
-        content: "AI study buddy for Nigerian students. PDF flashcards, course guidance, and read-to-earn rewards.",
-      },
-    ],
+    meta: pageMeta({
+      title: "Augur AI — Nigerian University Study Buddy",
+      description:
+        "Ask Augur AI about JAMB, coursework and study plans by text or voice, upload PDFs for flashcards and earn reading XP.",
+      path: "/chat",
+    }),
+    links: canonical("/chat"),
+    scripts: serviceJsonLd({
+      name: "Augur AI Study Buddy",
+      serviceType: "AI tutoring",
+      description:
+        "AI tutoring for Nigerian students covering JAMB drills, coursework explanations, past questions and study blueprints.",
+      path: "/chat",
+    }),
   }),
+
   component: ChatPage,
 });
 

@@ -17,21 +17,25 @@ export const Route = createFileRoute("/library/$itemId")({
     const entry = getLibraryEntry(params.itemId);
     const code = curated?.courseCode ?? entry?.code ?? "Course";
     const name = curated?.title ?? entry?.title ?? "Reading";
-    const title = `${code}: ${name} — Augur.edu Library`;
-    const description =
+    const title = `${code} ${name} Notes | Augur.edu`.slice(0, 60);
+    const description = (
       curated?.summary ??
-      `Read full ${code} lecture notes for Nigerian universities, check your understanding and earn verified study XP on Augur.edu.`;
+      `Read full ${code} lecture notes for Nigerian universities, check your understanding and earn verified study XP.`
+    ).slice(0, 155);
+    const path = `/library/${params.itemId}`;
     return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary" },
-      ],
+      meta: pageMeta({ title, description, path, type: "article" }),
+      links: canonical(path),
+      scripts: courseJsonLd({
+        code,
+        title: name,
+        description,
+        path,
+        department: entry?.department ?? "Nigerian university course",
+      }),
     };
   },
+
   component: LibraryReader,
 });
 
