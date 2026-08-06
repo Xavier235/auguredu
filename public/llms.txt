@@ -1,0 +1,29 @@
+# Augur.edu
+
+> Augur.edu is a Nigerian academic platform that predicts university admission chances from JAMB, Post-UTME and O'Level scores, forecasts CGPA from CA and exam scores, and provides readable lecture notes for every NUC course code alongside an AI study buddy.
+
+Augur.edu serves Nigerian secondary school leavers, undergraduates and postgraduate students. Everything runs in the browser and results can be saved to a student profile.
+
+## What Augur does
+
+- Admission predictor: applies each university's screening formula (for example LASU's 50% JAMB, 30% Post-UTME, 20% O'Level) across 40+ federal, state and private Nigerian universities, including indigene bonuses where they apply, and exports a PDF report.
+- CGPA forecaster: converts continuous assessment (0-30) and exam (0-70) scores per course into letter grades, semester GPA and projected cumulative CGPA on the 5.0 scale.
+- NUC course library: full lecture notes, key terms, exam tips and a comprehension check for every course code in the NUC catalogue, with verified reading XP.
+- Augur AI study buddy: text and voice chat covering JAMB drills, past question patterns, A-grade study blueprints, term paper and lab report structure, plus PDF and image flashcard generation.
+- Personal study workflow: weekly study plan tuned to a target CGPA, daily streaks, milestones and a log of every course read.
+
+## Key pages
+
+- /: overview of every Augur tool
+- /predictor: Nigerian university admission predictor
+- /cgpa: CGPA forecaster
+- /library: NUC course library
+- /study-plan: personal study workflow and streaks
+- /chat: Augur AI study buddy
+- /how-it-works: how the prediction models work
+- /upgrade: premium plans, paid by naira bank transfer
+
+## Notes
+
+- Coverage is Nigeria-specific: JAMB, Post-UTME, WAEC/NECO O'Level, NUC BMAS course codes and the 5.0 CGPA scale.
+- Predictions are statistical guidance, not admission guarantees.
