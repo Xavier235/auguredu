@@ -33,21 +33,21 @@ import { validateMatric, MATRIC_EXAMPLES } from "@/lib/matric";
 
 export const Route = createFileRoute("/cgpa")({
   head: () => ({
-    meta: [
-      { title: "CGPA Forecaster — Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Accurate Nigerian-university CGPA forecaster. Enter your CA (out of 30) and Exam (out of 70) per course — we compute totals, letter grades and your projected CGPA.",
-      },
-      { property: "og:title", content: "CGPA Forecaster — Augur.edu" },
-      {
-        property: "og:description",
-        content:
-          "Project your next-semester GPA and cumulative CGPA from CA + Exam scores.",
-      },
-    ],
+    meta: pageMeta({
+      title: "CGPA Forecaster for Nigerian Students | Augur.edu",
+      description:
+        "Enter your CA (out of 30) and Exam (out of 70) per course to get letter grades, semester GPA and your projected CGPA.",
+      path: "/cgpa",
+    }),
+    links: canonical("/cgpa"),
+    scripts: serviceJsonLd({
+      name: "CGPA Forecaster",
+      serviceType: "Academic performance forecasting",
+      description: "Forecast semester GPA and cumulative CGPA from continuous assessment and exam scores.",
+      path: "/cgpa",
+    }),
   }),
+
   component: CgpaPage,
 });
 

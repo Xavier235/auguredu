@@ -10,22 +10,22 @@ import { BookOpen, CheckCircle2, Clock, Filter, Sparkles, Star } from "lucide-re
 
 export const Route = createFileRoute("/library")({
   head: () => ({
-    meta: [
-      { title: "NUC Course Library — Read Any Course & Earn XP | Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Open any Nigerian university course code from the NUC catalogue, read full lecture notes written by Augur, pass the comprehension check and earn verified study XP.",
-      },
-      { property: "og:title", content: "NUC Course Library — Augur.edu" },
-      {
-        property: "og:description",
-        content: "Every NUC course code, readable notes, comprehension checks and verified reading XP.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
+    meta: pageMeta({
+      title: "NUC Course Library — Read Any Course | Augur.edu",
+      description:
+        "Open any NUC course code, read full lecture notes, pass the comprehension check and earn verified study XP.",
+      path: "/library",
+    }),
+    links: canonical("/library"),
+    scripts: serviceJsonLd({
+      name: "NUC Course Library",
+      serviceType: "Online course notes library",
+      description:
+        "Readable lecture notes, key terms, exam tips and comprehension checks for every NUC course code.",
+      path: "/library",
+    }),
   }),
+
   component: LibraryPage,
 });
 

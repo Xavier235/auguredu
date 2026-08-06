@@ -35,20 +35,22 @@ import {
 
 export const Route = createFileRoute("/predictor")({
   head: () => ({
-    meta: [
-      { title: "Nigerian University Course Predictor — Augur.edu" },
-      {
-        name: "description",
-        content:
-          "Pick any Nigerian university (LASU, UNILAG, UI, OAU, UNN, ABU and more) and predict the course you can study from your JAMB, Post-UTME and O'Level. Download a full PDF report.",
-      },
-      { property: "og:title", content: "Nigerian University Course Predictor" },
-      {
-        property: "og:description",
-        content: "Predict your admission chances at any Nigerian university.",
-      },
-    ],
+    meta: pageMeta({
+      title: "Nigerian University Admission Predictor | Augur.edu",
+      description:
+        "Predict the course you can study at LASU, UNILAG, UI, OAU, UNN, ABU and more from your JAMB, Post-UTME and O'Level scores.",
+      path: "/predictor",
+    }),
+    links: canonical("/predictor"),
+    scripts: serviceJsonLd({
+      name: "Nigerian University Admission Predictor",
+      serviceType: "Admission chance prediction",
+      description:
+        "Screening-formula admission prediction for Nigerian universities using JAMB, Post-UTME and O'Level results.",
+      path: "/predictor",
+    }),
   }),
+
   component: PredictorPage,
 });
 
