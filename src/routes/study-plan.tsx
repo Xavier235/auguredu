@@ -331,9 +331,9 @@ function StudyPlanPage() {
             </div>
 
             <div className="glass rounded-3xl p-6">
-              <h3 className="font-display text-lg font-semibold">
+              <h2 className="font-display text-lg font-semibold">
                 Your week, mapped out
-              </h3>
+              </h2>
               <div className="mt-4 space-y-2">
                 {plan.dailyBreakdown.map((d) => (
                   <div
