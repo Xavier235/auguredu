@@ -10,7 +10,20 @@ import { generateCourseReading, type GeneratedReading } from "@/lib/library-ai.f
 import { getLibraryItem } from "@/lib/library";
 import { getLibraryEntry, resolveEntry } from "@/lib/library-catalogue";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Clock, Crown, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import { generateCourseFlashcards, summariseForAudio, type Flashcard } from "@/lib/academics.functions";
+import { SpeakButton } from "@/components/voice";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Crown,
+  Layers,
+  Loader2,
+  MessageCircle,
+  Sparkles,
+  Timer,
+  Volume2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/library/$itemId")({
   head: ({ params }) => {
@@ -47,6 +60,14 @@ function LibraryReader() {
   const { user } = useAuth();
   const verify = useServerFn(verifyLibraryRead);
   const buildReading = useServerFn(generateCourseReading);
+  const buildCards = useServerFn(generateCourseFlashcards);
+  const buildAudio = useServerFn(summariseForAudio);
+
+  const [cards, setCards] = useState<Flashcard[] | null>(null);
+  const [cardsLoading, setCardsLoading] = useState(false);
+  const [flipped, setFlipped] = useState<Record<number, boolean>>({});
+  const [script, setScript] = useState<string>("");
+  const [scriptLoading, setScriptLoading] = useState(false);
 
   const started = useRef(Date.now());
   const [seconds, setSeconds] = useState(0);
@@ -128,6 +149,46 @@ function LibraryReader() {
   const verifyId = curated?.id ?? entry!.id;
 
   const allAnswered = quiz.length > 0 && quiz.every((_, i) => answers[i] !== undefined);
+
+  const notesText = [summary, ...sections.map((s) => `${s.heading}\n${s.body}`)].join("\n\n");
+
+  async function makeCards() {
+    if (!user) {
+      toast.error("Sign in to build flashcards.");
+      return;
+    }
+    setCardsLoading(true);
+    try {
+      const r = await buildCards({ data: { entryId: entry?.id ?? verifyId, notes: notesText.slice(0, 12000) } });
+      setCards(r as Flashcard[]);
+      setFlipped({});
+      if (!(r as Flashcard[]).length) toast.error("No flashcards came back, please try again.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not build flashcards.");
+    } finally {
+      setCardsLoading(false);
+    }
+  }
+
+  async function makeAudio() {
+    if (!user) {
+      toast.error("Sign in to build an audio summary.");
+      return;
+    }
+    if (notesText.trim().length < 50) {
+      toast.error("Open the notes first, then build the audio summary.");
+      return;
+    }
+    setScriptLoading(true);
+    try {
+      const r = await buildAudio({ data: { text: notesText.slice(0, 15000), label: `${code} ${title}` } });
+      setScript((r as { script: string }).script);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not build the audio summary.");
+    } finally {
+      setScriptLoading(false);
+    }
+  }
 
   async function submit() {
     if (!user) {
@@ -272,6 +333,69 @@ function LibraryReader() {
             </ul>
           </div>
         ) : null}
+
+        {sections.length > 0 && (
+          <div className="glass mt-6 rounded-2xl p-6">
+            <h2 className="font-display text-lg font-semibold">Study tools for {code}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Turn these notes into flashcards, listen to a spoken summary, or sit a timed test on this course.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                onClick={makeCards}
+                disabled={cardsLoading}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                {cardsLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Layers className="h-3 w-3" />}
+                {cardsLoading ? "Building cards" : "Smart flashcards"}
+              </button>
+              <button
+                onClick={makeAudio}
+                disabled={scriptLoading}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold hover:bg-accent/10 disabled:opacity-60"
+              >
+                {scriptLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Volume2 className="h-3 w-3" />}
+                {scriptLoading ? "Writing summary" : "Audio summary"}
+              </button>
+              <Link
+                to="/exam"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold hover:bg-accent/10"
+              >
+                <Timer className="h-3 w-3" /> Practise CBT
+              </Link>
+            </div>
+
+            {script && (
+              <div className="mt-4 rounded-xl border border-border bg-background/50 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Spoken summary</h3>
+                  <SpeakButton text={script} label="Play the audio summary" />
+                </div>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{script}</p>
+              </div>
+            )}
+
+            {cards && cards.length > 0 && (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {cards.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setFlipped((f) => ({ ...f, [i]: !f[i] }))}
+                    className="rounded-xl border border-border bg-background/50 p-4 text-left transition-colors hover:border-primary/50"
+                  >
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {flipped[i] ? "Answer" : `Card ${i + 1}`}
+                    </span>
+                    <p className="mt-1 text-sm leading-relaxed">{flipped[i] ? c.a : c.q}</p>
+                    <span className="mt-2 block text-[10px] text-primary">
+                      {flipped[i] ? "Tap to see the question" : "Tap to reveal"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {quiz.length > 0 && (
           <div className="glass mt-10 rounded-2xl p-6">

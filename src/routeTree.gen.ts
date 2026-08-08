@@ -14,12 +14,15 @@ import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as ExamRouteImport } from './routes/exam'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CgpaRouteImport } from './routes/cgpa'
+import { Route as CampusRouteImport } from './routes/campus'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
@@ -53,6 +56,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -73,6 +81,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExamRoute = ExamRouteImport.update({
+  id: '/exam',
+  path: '/exam',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -81,6 +94,11 @@ const ChatRoute = ChatRouteImport.update({
 const CgpaRoute = CgpaRouteImport.update({
   id: '/cgpa',
   path: '/cgpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampusRoute = CampusRouteImport.update({
+  id: '/campus',
+  path: '/campus',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -122,12 +140,15 @@ const ApiVoiceSpeakRoute = ApiVoiceSpeakRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -142,12 +163,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -163,12 +187,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -185,12 +212,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -205,12 +235,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -225,12 +258,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -246,12 +282,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CampusRoute: typeof CampusRoute
   CgpaRoute: typeof CgpaRoute
   ChatRoute: typeof ChatRoute
+  ExamRoute: typeof ExamRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LibraryRoute: typeof LibraryRouteWithChildren
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
+  ProjectsRoute: typeof ProjectsRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -300,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -328,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/exam': {
+      id: '/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof ExamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -340,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/cgpa'
       fullPath: '/cgpa'
       preLoaderRoute: typeof CgpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campus': {
+      id: '/campus'
+      path: '/campus'
+      fullPath: '/campus'
+      preLoaderRoute: typeof CampusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -408,12 +468,15 @@ const LibraryRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CampusRoute: CampusRoute,
   CgpaRoute: CgpaRoute,
   ChatRoute: ChatRoute,
+  ExamRoute: ExamRoute,
   HowItWorksRoute: HowItWorksRoute,
   LibraryRoute: LibraryRouteWithChildren,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
+  ProjectsRoute: ProjectsRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

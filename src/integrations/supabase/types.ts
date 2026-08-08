@@ -357,6 +357,125 @@ export type Database = {
         }
         Relationships: []
       }
+      study_group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          capacity: number
+          created_at: string
+          created_by: string
+          department: string
+          id: string
+          level: string
+          meeting_place: string
+          meeting_time: string
+          name: string
+          school: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          created_by: string
+          department?: string
+          id?: string
+          level?: string
+          meeting_place?: string
+          meeting_time?: string
+          name: string
+          school?: string
+          topic?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          created_by?: string
+          department?: string
+          id?: string
+          level?: string
+          meeting_place?: string
+          meeting_time?: string
+          name?: string
+          school?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_profiles: {
+        Row: {
+          about: string
+          availability: string
+          campus_area: string
+          contact_handle: string
+          created_at: string
+          department: string
+          discoverable: boolean
+          hostel: string
+          level: string
+          school: string
+          study_style: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          about?: string
+          availability?: string
+          campus_area?: string
+          contact_handle?: string
+          created_at?: string
+          department?: string
+          discoverable?: boolean
+          hostel?: string
+          level?: string
+          school?: string
+          study_style?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          about?: string
+          availability?: string
+          campus_area?: string
+          contact_handle?: string
+          created_at?: string
+          department?: string
+          discoverable?: boolean
+          hostel?: string
+          level?: string
+          school?: string
+          study_style?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_counters: {
         Row: {
           count: number
