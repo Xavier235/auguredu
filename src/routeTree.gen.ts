@@ -18,6 +18,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as ExamRouteImport } from './routes/exam'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CgpaRouteImport } from './routes/cgpa'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -73,6 +74,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExamRoute = ExamRouteImport.update({
+  id: '/exam',
+  path: '/exam',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
+  '/exam': typeof ExamRoute
   '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cgpa'
     | '/chat'
+    | '/exam'
     | '/how-it-works'
     | '/library'
     | '/predictor'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CgpaRoute: typeof CgpaRoute
   ChatRoute: typeof ChatRoute
+  ExamRoute: typeof ExamRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LibraryRoute: typeof LibraryRouteWithChildren
   PredictorRoute: typeof PredictorRoute
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exam': {
+      id: '/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof ExamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -410,6 +430,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CgpaRoute: CgpaRoute,
   ChatRoute: ChatRoute,
+  ExamRoute: ExamRoute,
   HowItWorksRoute: HowItWorksRoute,
   LibraryRoute: LibraryRouteWithChildren,
   PredictorRoute: PredictorRoute,
@@ -427,13 +448,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
