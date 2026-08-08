@@ -294,6 +294,69 @@ function LibraryReader() {
           </div>
         ) : null}
 
+        {sections.length > 0 && (
+          <div className="glass mt-6 rounded-2xl p-6">
+            <h2 className="font-display text-lg font-semibold">Study tools for {code}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Turn these notes into flashcards, listen to a spoken summary, or sit a timed test on this course.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                onClick={makeCards}
+                disabled={cardsLoading}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                {cardsLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Layers className="h-3 w-3" />}
+                {cardsLoading ? "Building cards" : "Smart flashcards"}
+              </button>
+              <button
+                onClick={makeAudio}
+                disabled={scriptLoading}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold hover:bg-accent/10 disabled:opacity-60"
+              >
+                {scriptLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Volume2 className="h-3 w-3" />}
+                {scriptLoading ? "Writing summary" : "Audio summary"}
+              </button>
+              <Link
+                to="/exam"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold hover:bg-accent/10"
+              >
+                <Timer className="h-3 w-3" /> Practise CBT
+              </Link>
+            </div>
+
+            {script && (
+              <div className="mt-4 rounded-xl border border-border bg-background/50 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Spoken summary</h3>
+                  <SpeakButton text={script} label="Play the audio summary" />
+                </div>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{script}</p>
+              </div>
+            )}
+
+            {cards && cards.length > 0 && (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {cards.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setFlipped((f) => ({ ...f, [i]: !f[i] }))}
+                    className="rounded-xl border border-border bg-background/50 p-4 text-left transition-colors hover:border-primary/50"
+                  >
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {flipped[i] ? "Answer" : `Card ${i + 1}`}
+                    </span>
+                    <p className="mt-1 text-sm leading-relaxed">{flipped[i] ? c.a : c.q}</p>
+                    <span className="mt-2 block text-[10px] text-primary">
+                      {flipped[i] ? "Tap to see the question" : "Tap to reveal"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {quiz.length > 0 && (
           <div className="glass mt-10 rounded-2xl p-6">
             <h2 className="font-display text-lg font-semibold">Comprehension check</h2>
