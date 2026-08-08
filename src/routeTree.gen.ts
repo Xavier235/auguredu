@@ -14,6 +14,7 @@ import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PredictorRouteImport } from './routes/predictor'
 import { Route as LibraryRouteImport } from './routes/library'
@@ -52,6 +53,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRouteWithChildren
   '/predictor': typeof PredictorRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/predictor'
     | '/profile'
+    | '/projects'
     | '/search'
     | '/settings'
     | '/sitemap.xml'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRouteWithChildren
   PredictorRoute: typeof PredictorRoute
   ProfileRoute: typeof ProfileRoute
+  ProjectsRoute: typeof ProjectsRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -435,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRouteWithChildren,
   PredictorRoute: PredictorRoute,
   ProfileRoute: ProfileRoute,
+  ProjectsRoute: ProjectsRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
