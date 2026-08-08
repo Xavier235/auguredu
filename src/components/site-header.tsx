@@ -32,8 +32,11 @@ export function SiteHeader() {
     { to: "/", label: "Home" },
     { to: "/predictor", label: "JAMB Predictor" },
     { to: "/cgpa", label: "CGPA" },
+    { to: "/exam", label: "CBT Exam" },
     { to: "/study-plan", label: "Study Plan" },
     { to: "/library", label: "Library" },
+    { to: "/projects", label: "Projects" },
+    { to: "/campus", label: "Campus" },
     { to: "/chat", label: "Chat" },
     ...(user
       ? [
