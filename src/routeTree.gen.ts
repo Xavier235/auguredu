@@ -22,6 +22,7 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ExamRouteImport } from './routes/exam'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CgpaRouteImport } from './routes/cgpa'
+import { Route as CampusRouteImport } from './routes/campus'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReadPdfIdRouteImport } from './routes/read.$pdfId'
@@ -95,6 +96,11 @@ const CgpaRoute = CgpaRouteImport.update({
   path: '/cgpa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampusRoute = CampusRouteImport.update({
+  id: '/campus',
+  path: '/campus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -134,6 +140,7 @@ const ApiVoiceSpeakRoute = ApiVoiceSpeakRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/exam': typeof ExamRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/exam': typeof ExamRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/campus': typeof CampusRoute
   '/cgpa': typeof CgpaRoute
   '/chat': typeof ChatRoute
   '/exam': typeof ExamRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
     | '/exam'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
     | '/exam'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/campus'
     | '/cgpa'
     | '/chat'
     | '/exam'
@@ -270,6 +282,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CampusRoute: typeof CampusRoute
   CgpaRoute: typeof CgpaRoute
   ChatRoute: typeof ChatRoute
   ExamRoute: typeof ExamRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CgpaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campus': {
+      id: '/campus'
+      path: '/campus'
+      fullPath: '/campus'
+      preLoaderRoute: typeof CampusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -448,6 +468,7 @@ const LibraryRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CampusRoute: CampusRoute,
   CgpaRoute: CgpaRoute,
   ChatRoute: ChatRoute,
   ExamRoute: ExamRoute,
