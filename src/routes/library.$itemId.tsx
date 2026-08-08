@@ -60,6 +60,14 @@ function LibraryReader() {
   const { user } = useAuth();
   const verify = useServerFn(verifyLibraryRead);
   const buildReading = useServerFn(generateCourseReading);
+  const buildCards = useServerFn(generateCourseFlashcards);
+  const buildAudio = useServerFn(summariseForAudio);
+
+  const [cards, setCards] = useState<Flashcard[] | null>(null);
+  const [cardsLoading, setCardsLoading] = useState(false);
+  const [flipped, setFlipped] = useState<Record<number, boolean>>({});
+  const [script, setScript] = useState<string>("");
+  const [scriptLoading, setScriptLoading] = useState(false);
 
   const started = useRef(Date.now());
   const [seconds, setSeconds] = useState(0);
