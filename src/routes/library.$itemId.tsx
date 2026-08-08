@@ -150,6 +150,46 @@ function LibraryReader() {
 
   const allAnswered = quiz.length > 0 && quiz.every((_, i) => answers[i] !== undefined);
 
+  const notesText = [summary, ...sections.map((s) => `${s.heading}\n${s.body}`)].join("\n\n");
+
+  async function makeCards() {
+    if (!user) {
+      toast.error("Sign in to build flashcards.");
+      return;
+    }
+    setCardsLoading(true);
+    try {
+      const r = await buildCards({ data: { entryId: entry?.id ?? verifyId, notes: notesText.slice(0, 12000) } });
+      setCards(r as Flashcard[]);
+      setFlipped({});
+      if (!(r as Flashcard[]).length) toast.error("No flashcards came back, please try again.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not build flashcards.");
+    } finally {
+      setCardsLoading(false);
+    }
+  }
+
+  async function makeAudio() {
+    if (!user) {
+      toast.error("Sign in to build an audio summary.");
+      return;
+    }
+    if (notesText.trim().length < 50) {
+      toast.error("Open the notes first, then build the audio summary.");
+      return;
+    }
+    setScriptLoading(true);
+    try {
+      const r = await buildAudio({ data: { text: notesText.slice(0, 15000), label: `${code} ${title}` } });
+      setScript((r as { script: string }).script);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not build the audio summary.");
+    } finally {
+      setScriptLoading(false);
+    }
+  }
+
   async function submit() {
     if (!user) {
       toast.error("Sign in to earn verified reading XP.");
