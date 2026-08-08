@@ -10,7 +10,20 @@ import { generateCourseReading, type GeneratedReading } from "@/lib/library-ai.f
 import { getLibraryItem } from "@/lib/library";
 import { getLibraryEntry, resolveEntry } from "@/lib/library-catalogue";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Clock, Crown, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import { generateCourseFlashcards, summariseForAudio, type Flashcard } from "@/lib/academics.functions";
+import { SpeakButton } from "@/components/voice";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Crown,
+  Layers,
+  Loader2,
+  MessageCircle,
+  Sparkles,
+  Timer,
+  Volume2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/library/$itemId")({
   head: ({ params }) => {
