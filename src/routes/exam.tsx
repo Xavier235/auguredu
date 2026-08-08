@@ -5,18 +5,20 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@/hooks/use-auth";
 import { generateExam, type ExamQuestion } from "@/lib/academics.functions";
-import { pageMeta } from "@/lib/seo";
+import { pageMeta, canonical } from "@/lib/seo";
 import { toast } from "sonner";
 import { Loader2, Timer, Play, RotateCcw, CheckCircle2, XCircle, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/exam")({
-  head: () =>
-    pageMeta({
-      title: "Live CBT Exam Simulator — JAMB & University Practice | Augur.edu",
+  head: () => ({
+    meta: pageMeta({
+      title: "Live CBT Exam Simulator, JAMB and University Practice | Augur.edu",
       description:
         "Sit a timed computer based test for JAMB, Post UTME or any Nigerian university course code, get instant scoring and full explanations for every question.",
       path: "/exam",
     }),
+    links: canonical("/exam"),
+  }),
   component: ExamPage,
 });
 
