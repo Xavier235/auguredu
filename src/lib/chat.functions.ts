@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { cleanAugurText, STYLE_RULES } from "@/lib/text-clean";
 import { LIBRARY_INDEX } from "@/lib/library-catalogue";
+import { LIBRARY } from "@/lib/library";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
