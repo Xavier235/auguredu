@@ -311,13 +311,30 @@ function ChatPage() {
               <Menu className="h-4 w-4" />
             </button>
             <h1 className="font-display text-xl font-semibold sm:text-2xl">
-              <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
-              Augur AI
+              {isProfessor ? (
+                <>
+                  <GraduationCap className="mr-2 inline h-5 w-5 text-amber-300" />
+                  Professor Augur
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
+                  Augur AI
+                </>
+              )}
             </h1>
           </div>
-          <button
-            onClick={() => newThread()}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportPdf}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent/10"
+            >
+              <FileDown className="h-3.5 w-3.5" /> PDF
+            </button>
+            <button
+              onClick={() => newThread()}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+
           >
             <Plus className="h-3.5 w-3.5" /> New chat
           </button>
