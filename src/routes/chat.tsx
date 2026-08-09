@@ -91,6 +91,7 @@ function ChatPage() {
   const loadMsgs = useServerFn(listMessages);
   const send = useServerFn(sendChatMessage);
   const genCards = useServerFn(generateFlashcardsFromAttachment);
+  const ask = useServerFn(askLecturer);
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
