@@ -76,6 +76,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Augur.edu" },
+      { name: "google-site-verification", content: "b764gfRQ2N6gJW8GIVLD9jHaN25V8Fm4IxMzzsEt2n8" },
       { property: "og:site_name", content: "Augur.edu" },
     ],
 
