@@ -334,11 +334,12 @@ function ChatPage() {
             <button
               onClick={() => newThread()}
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-
-          >
-            <Plus className="h-3.5 w-3.5" /> New chat
-          </button>
+            >
+              <Plus className="h-3.5 w-3.5" /> New chat
+            </button>
+          </div>
         </div>
+
 
         <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
           {/* Sidebar */}
