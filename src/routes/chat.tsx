@@ -111,6 +111,27 @@ function ChatPage() {
     [threads, activeIdParam],
   );
 
+  const isProfessor = activeThread?.room === "professor";
+
+  function exportPdf() {
+    const usable = messages.filter((m) => m.role !== "system" && m.content.trim());
+    if (usable.length === 0) {
+      toast.error("Nothing to export yet, ask a question first.");
+      return;
+    }
+    const title = activeThread?.title && activeThread.title !== "New chat"
+      ? activeThread.title
+      : isProfessor
+        ? "Professor Augur session"
+        : "Augur AI study notes";
+    messagesToPdf({
+      title,
+      messages: usable.map((m) => ({ role: m.role, content: cleanAugurText(m.content) })),
+      fileName: `augur-${slugForFile(title)}.pdf`,
+    });
+    toast.success("PDF downloaded");
+  }
+
   // Load threads on sign-in
   useEffect(() => {
     if (!user) return;
