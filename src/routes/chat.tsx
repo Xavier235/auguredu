@@ -362,10 +362,11 @@ function ChatPage() {
                   >
                     <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
                     <div>
-                      <div className="font-medium">Talk to a Professor</div>
+                      <div className="font-medium">Unlimited Professor access</div>
                       <div className="text-xs text-muted-foreground">
-                        Premium — human-style worked examples & syllabus mapping.
+                        Free plan gives 5 Professor questions a day. Upgrade for unlimited.
                       </div>
+
                     </div>
                   </Link>
                 </div>
