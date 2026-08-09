@@ -201,9 +201,13 @@ function ChatPage() {
     setPendingAttachment(null);
 
     try {
-      await send({
-        data: { threadId, content: contentToSend, attachments: attToSend, mode },
-      });
+      if (isProfessor) {
+        await ask({ data: { threadId, question: contentToSend } });
+      } else {
+        await send({
+          data: { threadId, content: contentToSend, attachments: attToSend, mode },
+        });
+      }
       // Reload messages fresh (gets real IDs + signed URLs)
       const fresh = await loadMsgs({ data: { threadId } });
       setMessages(fresh);
