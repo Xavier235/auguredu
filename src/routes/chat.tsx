@@ -475,22 +475,31 @@ function ChatPage() {
                   </div>
                 </div>
               )}
-              <div className="mb-2 flex flex-wrap gap-1.5">
-                {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
-                      mode === m
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
-                    }`}
-                  >
-                    {CHAT_MODES[m]}
-                  </button>
-                ))}
-              </div>
+              {isProfessor ? (
+                <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200">
+                  <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                  You are in office hours with Professor Augur. Mention a course code such as CSC 201 and he will teach
+                  from the Augur library notes for that exact course.
+                </div>
+              ) : (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMode(m)}
+                      className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                        mode === m
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
+                      }`}
+                    >
+                      {CHAT_MODES[m]}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
