@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { cleanAugurText, STYLE_RULES } from "@/lib/text-clean";
 import { LIBRARY_INDEX } from "@/lib/library-catalogue";
+import { LIBRARY } from "@/lib/library";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
@@ -463,7 +464,35 @@ export const getPdfSignedUrl = createServerFn({ method: "POST" })
     return { url, title: (doc as any).title, mimeType: (doc as any).mime_type, pageCount: (doc as any).page_count };
   });
 
-// -------- Ask the lecturer (paid tier, quota'd for free) --------
+// -------- Ask the Professor (premium tier, quota'd for free) --------
+
+/**
+ * Grounds a Professor answer in the actual Augur course material for any course
+ * code the student mentions: curated notes when we have them, catalogue facts
+ * (department, faculty, level, units) otherwise.
+ */
+function courseContext(question: string) {
+  const codes = question.toUpperCase().match(/\b[A-Z]{2,4}\s?\d{3}\b/g) ?? [];
+  if (codes.length === 0) return "";
+  const norm = (c: string) => c.replace(/\s+/g, "").toUpperCase();
+  const hits = LIBRARY_INDEX.filter((e) => codes.some((c) => norm(c) === norm(e.code))).slice(0, 3);
+  if (hits.length === 0) return "";
+
+  const blocks = hits.map((h) => {
+    const curated = h.curatedId ? LIBRARY.find((i) => i.id === h.curatedId) : null;
+    const head = `${h.code} ${h.title}, ${h.department}, ${h.faculty}, ${h.level} level, ${h.units} units.`;
+    if (!curated) return head;
+    const notes = curated.sections
+      .slice(0, 4)
+      .map((s) => `${s.heading}: ${s.body.slice(0, 700)}`)
+      .join("\n");
+    return `${head}\nAugur library summary: ${curated.summary}\n${notes}`;
+  });
+
+  return `\n\nCOURSE CONTEXT from the Augur library, use it as the authoritative syllabus for this student and stay consistent with it. Tell the student they can read the full notes and earn reading XP at /library.\n${blocks.join(
+    "\n\n",
+  )}`;
+}
 
 export const askLecturer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -474,19 +503,42 @@ export const askLecturer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await enforceQuota(supabase, userId, "lecturer");
 
+    // Prior turns in this thread so the Professor remembers the conversation.
+    const { data: past } = await (supabase as any)
+      .from("chat_messages_v2")
+      .select("role, content")
+      .eq("thread_id", data.threadId)
+      .order("created_at", { ascending: false })
+      .limit(14);
+
+    const history: ChatMsg[] = ((past as any[]) ?? [])
+      .reverse()
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: String(m.content ?? "").replace(/^\[Professor\]\s*/, "").slice(0, 4000),
+      }));
+
     await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
       user_id: userId,
       role: "user",
-      content: `[Lecturer] ${data.question}`,
+      content: `[Professor] ${data.question}`,
       attachments: [],
     });
 
     const reply = cleanAugurText(
-      await callGateway([
-        { role: "system", content: `${LECTURER_PROMPT}\n\n${todayLine()}${libraryHint(data.question)}` },
-        { role: "user", content: data.question },
-      ], PROFESSOR_MODEL),
+      await callGateway(
+        [
+          {
+            role: "system",
+            content: `${LECTURER_PROMPT}\n\n${todayLine()}${courseContext(data.question)}${libraryHint(data.question)}`,
+          },
+          ...history,
+          { role: "user", content: data.question },
+        ],
+        PROFESSOR_MODEL,
+      ),
     );
 
     await (supabase as any).from("chat_messages_v2").insert({
@@ -499,6 +551,7 @@ export const askLecturer = createServerFn({ method: "POST" })
 
     return { ok: true, reply };
   });
+
 
 // -------- Usage + profile helpers --------
 

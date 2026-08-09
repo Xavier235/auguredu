@@ -26,6 +26,8 @@ import {
   Paperclip,
   Loader2,
   FileText,
+  FileDown,
+  GraduationCap,
   ImageIcon,
   Lock,
   BookOpen,
@@ -34,6 +36,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { askLecturer } from "@/lib/chat.functions";
+import { messagesToPdf, slugForFile } from "@/lib/chat-pdf";
 
 const searchSchema = z.object({ t: z.string().uuid().optional() });
 
@@ -71,6 +75,7 @@ type Message = {
 
 const ROOMS = [
   { id: "study-buddy", label: "Study Buddy", desc: "General AI help", icon: Sparkles },
+  { id: "professor", label: "Professor Augur", desc: "Deep syllabus answers", icon: GraduationCap },
   { id: "jamb-tutor", label: "JAMB Tutor", desc: "UTME prep drills", icon: BookOpen },
   { id: "essay-coach", label: "Essay Coach", desc: "Writing feedback", icon: FileText },
 ];
@@ -86,6 +91,7 @@ function ChatPage() {
   const loadMsgs = useServerFn(listMessages);
   const send = useServerFn(sendChatMessage);
   const genCards = useServerFn(generateFlashcardsFromAttachment);
+  const ask = useServerFn(askLecturer);
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -104,6 +110,27 @@ function ChatPage() {
     () => threads.find((t) => t.id === activeIdParam) ?? null,
     [threads, activeIdParam],
   );
+
+  const isProfessor = activeThread?.room === "professor";
+
+  function exportPdf() {
+    const usable = messages.filter((m) => m.role !== "system" && m.content.trim());
+    if (usable.length === 0) {
+      toast.error("Nothing to export yet, ask a question first.");
+      return;
+    }
+    const title = activeThread?.title && activeThread.title !== "New chat"
+      ? activeThread.title
+      : isProfessor
+        ? "Professor Augur session"
+        : "Augur AI study notes";
+    messagesToPdf({
+      title,
+      messages: usable.map((m) => ({ role: m.role, content: cleanAugurText(m.content) })),
+      fileName: `augur-${slugForFile(title)}.pdf`,
+    });
+    toast.success("PDF downloaded");
+  }
 
   // Load threads on sign-in
   useEffect(() => {
@@ -196,9 +223,13 @@ function ChatPage() {
     setPendingAttachment(null);
 
     try {
-      await send({
-        data: { threadId, content: contentToSend, attachments: attToSend, mode },
-      });
+      if (isProfessor) {
+        await ask({ data: { threadId, question: contentToSend } });
+      } else {
+        await send({
+          data: { threadId, content: contentToSend, attachments: attToSend, mode },
+        });
+      }
       // Reload messages fresh (gets real IDs + signed URLs)
       const fresh = await loadMsgs({ data: { threadId } });
       setMessages(fresh);
@@ -280,17 +311,35 @@ function ChatPage() {
               <Menu className="h-4 w-4" />
             </button>
             <h1 className="font-display text-xl font-semibold sm:text-2xl">
-              <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
-              Augur AI
+              {isProfessor ? (
+                <>
+                  <GraduationCap className="mr-2 inline h-5 w-5 text-amber-300" />
+                  Professor Augur
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
+                  Augur AI
+                </>
+              )}
             </h1>
           </div>
-          <button
-            onClick={() => newThread()}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <Plus className="h-3.5 w-3.5" /> New chat
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportPdf}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent/10"
+            >
+              <FileDown className="h-3.5 w-3.5" /> PDF
+            </button>
+            <button
+              onClick={() => newThread()}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-3.5 w-3.5" /> New chat
+            </button>
+          </div>
         </div>
+
 
         <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
           {/* Sidebar */}
@@ -331,10 +380,11 @@ function ChatPage() {
                   >
                     <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
                     <div>
-                      <div className="font-medium">Talk to a Professor</div>
+                      <div className="font-medium">Unlimited Professor access</div>
                       <div className="text-xs text-muted-foreground">
-                        Premium — human-style worked examples & syllabus mapping.
+                        Free plan gives 5 Professor questions a day. Upgrade for unlimited.
                       </div>
+
                     </div>
                   </Link>
                 </div>
@@ -425,22 +475,31 @@ function ChatPage() {
                   </div>
                 </div>
               )}
-              <div className="mb-2 flex flex-wrap gap-1.5">
-                {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
-                      mode === m
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
-                    }`}
-                  >
-                    {CHAT_MODES[m]}
-                  </button>
-                ))}
-              </div>
+              {isProfessor ? (
+                <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200">
+                  <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                  You are in office hours with Professor Augur. Mention a course code such as CSC 201 and he will teach
+                  from the Augur library notes for that exact course.
+                </div>
+              ) : (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {(Object.keys(CHAT_MODES) as ChatMode[]).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMode(m)}
+                      className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                        mode === m
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-border bg-background/60 text-muted-foreground hover:bg-accent/10"
+                      }`}
+                    >
+                      {CHAT_MODES[m]}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
