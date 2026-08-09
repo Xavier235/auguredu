@@ -71,6 +71,7 @@ type Message = {
 
 const ROOMS = [
   { id: "study-buddy", label: "Study Buddy", desc: "General AI help", icon: Sparkles },
+  { id: "professor", label: "Professor Augur", desc: "Deep syllabus answers", icon: GraduationCap },
   { id: "jamb-tutor", label: "JAMB Tutor", desc: "UTME prep drills", icon: BookOpen },
   { id: "essay-coach", label: "Essay Coach", desc: "Writing feedback", icon: FileText },
 ];
