@@ -26,6 +26,8 @@ import {
   Paperclip,
   Loader2,
   FileText,
+  FileDown,
+  GraduationCap,
   ImageIcon,
   Lock,
   BookOpen,
@@ -34,6 +36,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { askLecturer } from "@/lib/chat.functions";
+import { messagesToPdf, slugForFile } from "@/lib/chat-pdf";
 
 const searchSchema = z.object({ t: z.string().uuid().optional() });
 
