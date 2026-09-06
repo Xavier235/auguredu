@@ -9,7 +9,7 @@ import { listMyLibraryReads } from "@/lib/library.functions";
 import { LIBRARY_INDEX, LIBRARY_DEPT_OPTIONS, LIBRARY_FACULTIES } from "@/lib/library-catalogue";
 import { BookOpen, CheckCircle2, Clock, Filter, Sparkles, Star } from "lucide-react";
 
-export const Route = createFileRoute("/library")({
+export const Route = createFileRoute("/library/")({
   head: () => ({
     meta: pageMeta({
       title: "NUC Course Library — Read Any Course | Augur.edu",

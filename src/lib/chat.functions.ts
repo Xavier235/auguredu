@@ -126,6 +126,105 @@ async function signAttachment(
   return data?.signedUrl ?? null;
 }
 
+// -------- Who the student is, and what Augur remembers about them --------
+
+/**
+ * Builds a "who am I talking to" block from the student's own saved profile,
+ * campus study profile, XP and recent verified readings, plus the long term
+ * memory Augur has written about them across every past conversation.
+ */
+async function studentContext(supabase: any, userId: string) {
+  const [prof, study, xp, reads, mem, preds] = await Promise.all([
+    supabase.from("profiles").select("display_name, school, level, bio, is_verified_student, subscription_tier").eq("id", userId).maybeSingle(),
+    supabase.from("study_profiles").select("school, department, level, study_style, availability, about, courses, goal").eq("user_id", userId).maybeSingle(),
+    supabase.from("user_xp").select("xp, level").eq("user_id", userId).maybeSingle(),
+    supabase.from("library_reads").select("item_title, department, level, verified").eq("user_id", userId).order("updated_at", { ascending: false }).limit(8),
+    supabase.from("user_memory").select("summary").eq("user_id", userId).maybeSingle(),
+    supabase.from("predictions").select("label, jamb_score, top_course, top_course_chance").eq("user_id", userId).order("created_at", { ascending: false }).limit(2),
+  ]);
+
+  const p = prof?.data ?? {};
+  const s = study?.data ?? {};
+  const lines: string[] = [];
+  if (p.display_name) lines.push(`Name: ${p.display_name}`);
+  if (p.school || s.school) lines.push(`School: ${p.school || s.school}`);
+  if (s.department) lines.push(`Department: ${s.department}`);
+  if (p.level || s.level) lines.push(`Level: ${p.level || s.level}`);
+  if (s.courses) lines.push(`Current courses: ${s.courses}`);
+  if (s.goal) lines.push(`Stated goal: ${s.goal}`);
+  if (s.study_style) lines.push(`Preferred study style: ${s.study_style}`);
+  if (s.availability) lines.push(`Usually free: ${s.availability}`);
+  if (p.bio || s.about) lines.push(`About them: ${p.bio || s.about}`);
+  if (p.is_verified_student) lines.push("Verified Nigerian student email.");
+  if (p.subscription_tier && p.subscription_tier !== "free") lines.push(`Premium member (${p.subscription_tier}).`);
+  if (xp?.data) lines.push(`Study XP: ${xp.data.xp}, level ${xp.data.level}.`);
+
+  const readRows = (reads?.data as any[]) ?? [];
+  if (readRows.length) {
+    lines.push(
+      `Recently read in the library: ${readRows
+        .map((r) => `${r.item_title}${r.verified ? " (verified)" : ""}`)
+        .join("; ")}`,
+    );
+  }
+  const predRows = (preds?.data as any[]) ?? [];
+  if (predRows.length) {
+    lines.push(
+      `Admission predictions saved: ${predRows
+        .map((r) => `${r.label ?? "prediction"} JAMB ${r.jamb_score}, best fit ${r.top_course ?? "n/a"} at ${r.top_course_chance ?? 0}%`)
+        .join("; ")}`,
+    );
+  }
+
+  const memory = String(mem?.data?.summary ?? "").trim();
+
+  let block = "";
+  if (lines.length) {
+    block += `\n\nSTUDENT PROFILE, this is who you are speaking with. Greet them by first name where natural, tailor every example to their department, level and school, and never ask them for details that are already listed here.\n${lines.join("\n")}`;
+  }
+  if (memory) {
+    block += `\n\nWHAT YOU ALREADY KNOW ABOUT THIS STUDENT from all your past conversations. Treat it as true, refer back to it naturally, and continue from where you both stopped.\n${memory}`;
+  }
+  return block;
+}
+
+/**
+ * Rewrites the durable memory after each exchange so nothing important is ever
+ * lost, even in a brand new thread.
+ */
+async function updateMemory(supabase: any, userId: string, question: string, answer: string) {
+  try {
+    const { data: existing } = await supabase
+      .from("user_memory")
+      .select("summary")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const previous = String((existing as any)?.summary ?? "");
+
+    const summary = cleanAugurText(
+      await callGateway([
+        {
+          role: "system",
+          content:
+            "You maintain a long term memory note about one Nigerian university student for their study assistant. Merge the new exchange into the existing note. Keep durable facts only: their name, school, department, level, courses, exams and dates, goals, weak topics, strengths, preferences, commitments and anything they asked you to remember. Remove nothing that is still true, drop nothing important, and never invent facts. Reply with the updated note as short plain lines, under 220 words, no headings and no formatting characters.",
+        },
+        {
+          role: "user",
+          content: `EXISTING NOTE:\n${previous || "(empty)"}\n\nNEW EXCHANGE:\nStudent: ${question.slice(0, 2000)}\nAssistant: ${answer.slice(0, 2000)}`,
+        },
+      ]),
+    ).slice(0, 4000);
+
+    if (!summary.trim()) return;
+    await supabase
+      .from("user_memory")
+      .upsert({ user_id: userId, summary, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+  } catch {
+    // Memory is best effort, never break the reply because of it.
+  }
+}
+
+
 // -------- Threads --------
 
 export const listThreads = createServerFn({ method: "GET" })
@@ -223,18 +322,21 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     });
     if (userErr) throw new Error(userErr.message);
 
-    // Load recent history
+    // Load the whole conversation so nothing in this thread is forgotten
     const { data: history } = await (supabase as any)
       .from("chat_messages_v2")
       .select("role, content, attachments")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true })
-      .limit(30);
+      .limit(200);
 
-    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], libraryHint(data.content)]
+    const who = await studentContext(supabase, userId);
+
+    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], who, libraryHint(data.content)]
       .filter(Boolean)
       .join("\n\n");
     const messages: ChatMsg[] = [{ role: "system", content: systemContent }];
+
     for (const h of (history as any[]) ?? []) {
       const parts: Array<Record<string, unknown>> = [{ type: "text", text: h.content }];
       if (Array.isArray(h.attachments)) {
@@ -275,6 +377,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       patch.title = data.content.slice(0, 60);
     }
     await (supabase as any).from("chat_threads").update(patch).eq("id", data.threadId);
+
+    await updateMemory(supabase, userId, data.content, assistantContent);
 
     return { ok: true, reply: assistantContent };
   });
@@ -503,13 +607,13 @@ export const askLecturer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await enforceQuota(supabase, userId, "lecturer");
 
-    // Prior turns in this thread so the Professor remembers the conversation.
+    // Every prior turn in this thread, so the Professor remembers the conversation.
     const { data: past } = await (supabase as any)
       .from("chat_messages_v2")
       .select("role, content")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: false })
-      .limit(14);
+      .limit(200);
 
     const history: ChatMsg[] = ((past as any[]) ?? [])
       .reverse()
@@ -518,6 +622,8 @@ export const askLecturer = createServerFn({ method: "POST" })
         role: m.role as "user" | "assistant",
         content: String(m.content ?? "").replace(/^\[Professor\]\s*/, "").slice(0, 4000),
       }));
+
+    const who = await studentContext(supabase, userId);
 
     await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
@@ -532,7 +638,7 @@ export const askLecturer = createServerFn({ method: "POST" })
         [
           {
             role: "system",
-            content: `${LECTURER_PROMPT}\n\n${todayLine()}${courseContext(data.question)}${libraryHint(data.question)}`,
+            content: `${LECTURER_PROMPT}\n\n${todayLine()}${who}${courseContext(data.question)}${libraryHint(data.question)}`,
           },
           ...history,
           { role: "user", content: data.question },
@@ -549,7 +655,29 @@ export const askLecturer = createServerFn({ method: "POST" })
       attachments: [],
     });
 
+    await updateMemory(supabase, userId, data.question, reply);
+
     return { ok: true, reply };
+  });
+
+/** What Augur currently remembers about the signed in student. */
+export const getMyMemory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await (context.supabase as any)
+      .from("user_memory")
+      .select("summary, updated_at")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return { summary: (data as any)?.summary ?? "", updatedAt: (data as any)?.updated_at ?? null };
+  });
+
+/** Lets a student wipe what Augur remembers about them. */
+export const clearMyMemory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await (context.supabase as any).from("user_memory").delete().eq("user_id", context.userId);
+    return { ok: true };
   });
 
 

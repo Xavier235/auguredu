@@ -30,6 +30,8 @@ const STYLES = [
   { id: "past-questions", label: "Past question drilling" },
 ];
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 type Profile = {
   user_id: string;
   school: string;
@@ -42,6 +44,9 @@ type Profile = {
   about: string;
   contact_handle: string;
   discoverable: boolean;
+  courses: string;
+  goal: string;
+  days: string;
 };
 
 type Group = {
@@ -69,17 +74,72 @@ const EMPTY: Profile = {
   about: "",
   contact_handle: "",
   discoverable: true,
+  courses: "",
+  goal: "",
+  days: "",
 };
 
-function matchScore(me: Profile, other: Profile) {
+const splitList = (v: string) =>
+  (v ?? "")
+    .split(/[,\n;]+/)
+    .map((x) => x.trim().toUpperCase().replace(/\s+/g, " "))
+    .filter(Boolean);
+
+/**
+ * Weighted match. Shared course codes and overlapping free days matter most
+ * after department and level, because those decide whether two students can
+ * actually sit down and read together.
+ */
+function matchDetail(me: Profile, other: Profile) {
   let s = 0;
-  if (me.department && me.department === other.department) s += 40;
-  if (me.level && me.level === other.level) s += 20;
-  if (me.school && me.school.toLowerCase() === other.school.toLowerCase()) s += 20;
-  if (me.campus_area && me.campus_area.toLowerCase() === other.campus_area.toLowerCase()) s += 10;
-  if (me.hostel && me.hostel.toLowerCase() === other.hostel.toLowerCase()) s += 5;
-  if (me.study_style && me.study_style === other.study_style) s += 5;
-  return s;
+  const reasons: string[] = [];
+
+  const myCourses = splitList(me.courses);
+  const theirCourses = splitList(other.courses);
+  const sharedCourses = myCourses.filter((c) => theirCourses.includes(c));
+  if (sharedCourses.length) {
+    s += Math.min(30, sharedCourses.length * 12);
+    reasons.push(`${sharedCourses.length} shared course${sharedCourses.length > 1 ? "s" : ""}: ${sharedCourses.slice(0, 4).join(", ")}`);
+  }
+
+  if (me.department && me.department === other.department) {
+    s += 25;
+    reasons.push("Same department");
+  }
+  if (me.level && me.level === other.level) {
+    s += 15;
+    reasons.push(`Both in ${other.level} level`);
+  }
+  if (me.school && other.school && me.school.toLowerCase() === other.school.toLowerCase()) {
+    s += 15;
+    reasons.push("Same school");
+  }
+
+  const myDays = splitList(me.days);
+  const sharedDays = splitList(other.days).filter((d) => myDays.includes(d));
+  if (sharedDays.length) {
+    s += Math.min(10, sharedDays.length * 3);
+    reasons.push(`Both free ${sharedDays.join(", ")}`);
+  }
+
+  if (me.campus_area && other.campus_area && me.campus_area.toLowerCase() === other.campus_area.toLowerCase()) {
+    s += 8;
+    reasons.push("Same campus area");
+  }
+  if (me.hostel && other.hostel && me.hostel.toLowerCase() === other.hostel.toLowerCase()) {
+    s += 4;
+    reasons.push("Stay in the same place");
+  }
+  if (me.study_style && me.study_style === other.study_style) {
+    s += 3;
+    reasons.push("Same study style");
+  }
+  if (me.goal && other.goal && me.goal.trim().toLowerCase() === other.goal.trim().toLowerCase()) {
+    s += 5;
+    reasons.push("Chasing the same goal");
+  }
+
+  return { score: Math.min(100, s), reasons, sharedCourses };
 }
 
 function CampusPage() {
