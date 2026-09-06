@@ -427,6 +427,8 @@ function ChatPage() {
                   })}
                 </ul>
               </div>
+
+              <MemoryPanel />
             </div>
           </aside>
 
