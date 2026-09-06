@@ -32,11 +32,12 @@ import {
   Lock,
   BookOpen,
   Menu,
+  BrainCircuit,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { askLecturer } from "@/lib/chat.functions";
+import { askLecturer, getMyMemory, clearMyMemory } from "@/lib/chat.functions";
 import { messagesToPdf, slugForFile } from "@/lib/chat-pdf";
 
 const searchSchema = z.object({ t: z.string().uuid().optional() });
@@ -643,6 +644,51 @@ function Bubble({ m }: { m: Message }) {
         </div>
         {!mine && m.content.trim().length > 0 && <SpeakButton text={cleanAugurText(m.content)} />}
       </div>
+    </div>
+  );
+}
+
+/** Shows the student what Augur remembers about them across every chat. */
+function MemoryPanel() {
+  const load = useServerFn(getMyMemory);
+  const wipe = useServerFn(clearMyMemory);
+  const { user } = useAuth();
+  const [summary, setSummary] = useState("");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    load({})
+      .then((r: any) => setSummary(r?.summary ?? ""))
+      .catch(() => {});
+  }, [user?.id]);
+
+  if (!user || !summary.trim()) return null;
+
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/40 p-3">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+      >
+        <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+        What Augur remembers
+      </button>
+      {open && (
+        <>
+          <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{summary}</p>
+          <button
+            onClick={async () => {
+              await wipe({});
+              setSummary("");
+              toast.success("Augur has forgotten your saved details.");
+            }}
+            className="mt-3 rounded-full border border-border px-3 py-1 text-[11px] font-medium hover:bg-destructive/10 hover:text-destructive"
+          >
+            Forget everything
+          </button>
+        </>
+      )}
     </div>
   );
 }
