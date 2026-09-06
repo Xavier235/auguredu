@@ -378,6 +378,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     }
     await (supabase as any).from("chat_threads").update(patch).eq("id", data.threadId);
 
+    await updateMemory(supabase, userId, data.content, assistantContent);
+
     return { ok: true, reply: assistantContent };
   });
 
