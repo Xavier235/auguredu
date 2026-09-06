@@ -434,9 +434,12 @@ export type Database = {
           availability: string
           campus_area: string
           contact_handle: string
+          courses: string
           created_at: string
+          days: string
           department: string
           discoverable: boolean
+          goal: string
           hostel: string
           level: string
           school: string
@@ -449,9 +452,12 @@ export type Database = {
           availability?: string
           campus_area?: string
           contact_handle?: string
+          courses?: string
           created_at?: string
+          days?: string
           department?: string
           discoverable?: boolean
+          goal?: string
           hostel?: string
           level?: string
           school?: string
@@ -464,9 +470,12 @@ export type Database = {
           availability?: string
           campus_area?: string
           contact_handle?: string
+          courses?: string
           created_at?: string
+          days?: string
           department?: string
           discoverable?: boolean
+          goal?: string
           hostel?: string
           level?: string
           school?: string
@@ -495,6 +504,24 @@ export type Database = {
           count?: number
           day?: string
           feature?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_memory: {
+        Row: {
+          summary: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          summary?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          summary?: string
           updated_at?: string
           user_id?: string
         }
