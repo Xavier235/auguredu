@@ -655,7 +655,29 @@ export const askLecturer = createServerFn({ method: "POST" })
       attachments: [],
     });
 
+    await updateMemory(supabase, userId, data.question, reply);
+
     return { ok: true, reply };
+  });
+
+/** What Augur currently remembers about the signed in student. */
+export const getMyMemory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await (context.supabase as any)
+      .from("user_memory")
+      .select("summary, updated_at")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return { summary: (data as any)?.summary ?? "", updatedAt: (data as any)?.updated_at ?? null };
+  });
+
+/** Lets a student wipe what Augur remembers about them. */
+export const clearMyMemory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await (context.supabase as any).from("user_memory").delete().eq("user_id", context.userId);
+    return { ok: true };
   });
 
 
