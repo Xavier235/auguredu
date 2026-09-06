@@ -607,13 +607,13 @@ export const askLecturer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await enforceQuota(supabase, userId, "lecturer");
 
-    // Prior turns in this thread so the Professor remembers the conversation.
+    // Every prior turn in this thread, so the Professor remembers the conversation.
     const { data: past } = await (supabase as any)
       .from("chat_messages_v2")
       .select("role, content")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: false })
-      .limit(14);
+      .limit(200);
 
     const history: ChatMsg[] = ((past as any[]) ?? [])
       .reverse()
@@ -622,6 +622,8 @@ export const askLecturer = createServerFn({ method: "POST" })
         role: m.role as "user" | "assistant",
         content: String(m.content ?? "").replace(/^\[Professor\]\s*/, "").slice(0, 4000),
       }));
+
+    const who = await studentContext(supabase, userId);
 
     await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
@@ -636,7 +638,7 @@ export const askLecturer = createServerFn({ method: "POST" })
         [
           {
             role: "system",
-            content: `${LECTURER_PROMPT}\n\n${todayLine()}${courseContext(data.question)}${libraryHint(data.question)}`,
+            content: `${LECTURER_PROMPT}\n\n${todayLine()}${who}${courseContext(data.question)}${libraryHint(data.question)}`,
           },
           ...history,
           { role: "user", content: data.question },
