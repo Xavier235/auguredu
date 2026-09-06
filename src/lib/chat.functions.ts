@@ -322,18 +322,21 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     });
     if (userErr) throw new Error(userErr.message);
 
-    // Load recent history
+    // Load the whole conversation so nothing in this thread is forgotten
     const { data: history } = await (supabase as any)
       .from("chat_messages_v2")
       .select("role, content, attachments")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true })
-      .limit(30);
+      .limit(200);
 
-    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], libraryHint(data.content)]
+    const who = await studentContext(supabase, userId);
+
+    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], who, libraryHint(data.content)]
       .filter(Boolean)
       .join("\n\n");
     const messages: ChatMsg[] = [{ role: "system", content: systemContent }];
+
     for (const h of (history as any[]) ?? []) {
       const parts: Array<Record<string, unknown>> = [{ type: "text", text: h.content }];
       if (Array.isArray(h.attachments)) {
