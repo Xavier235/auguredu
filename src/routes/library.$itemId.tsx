@@ -290,9 +290,15 @@ function LibraryReader() {
           </div>
         )}
 
-        {loadError && (
-          <div className="mt-8 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {loadError}
+        {loadError && !loading && (
+          <div className="glass mt-8 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+            <p>{loadError}</p>
+            <button
+              onClick={() => setRetry((n) => n + 1)}
+              className="mt-4 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
+            >
+              Retry
+            </button>
           </div>
         )}
 
