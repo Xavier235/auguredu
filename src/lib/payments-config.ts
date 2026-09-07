@@ -98,6 +98,23 @@ export const PLANS: Record<
   },
 };
 
+// ---- Referral discount -----------------------------------------------------
+// Students who enter this code on the upgrade page pay 20% less.
+export const REFERRAL_CODE = "FOUNTAIN TEENS";
+export const REFERRAL_DISCOUNT = 0.2;
+
+const normalise = (v: string) => v.trim().toUpperCase().replace(/\s+/g, " ");
+
+export function isValidReferral(code?: string | null) {
+  return !!code && normalise(code) === REFERRAL_CODE;
+}
+
+/** Price after applying the referral discount, rounded to whole naira. */
+export function priceFor(planId: PlanId, referral?: string | null) {
+  const base = PLANS[planId].priceNaira;
+  return isValidReferral(referral) ? Math.round(base * (1 - REFERRAL_DISCOUNT)) : base;
+}
+
 export function formatNaira(n: number) {
   return "₦" + n.toLocaleString("en-NG");
 }
