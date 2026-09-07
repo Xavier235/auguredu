@@ -252,11 +252,33 @@ function UpgradePage() {
               <BankRow label="Bank" value={BANK_DETAILS.bankName} onCopy={copy} />
               <BankRow label="Account name" value={BANK_DETAILS.accountName} onCopy={copy} />
               <BankRow label="Account number" value={BANK_DETAILS.accountNumber} onCopy={copy} large />
-              <BankRow label="Amount" value={formatNaira(selected.priceNaira)} onCopy={copy} />
+              <BankRow label="Amount" value={formatNaira(payable)} onCopy={copy} />
               {BANK_DETAILS.altValue && (
                 <BankRow label={BANK_DETAILS.altLabel} value={BANK_DETAILS.altValue} onCopy={copy} />
               )}
             </div>
+
+            <div className="mt-5">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">Referral code (optional)</span>
+              <input
+                value={referral}
+                onChange={(e) => setReferral(e.target.value)}
+                placeholder={`e.g. ${REFERRAL_CODE}`}
+                className={`w-full rounded-xl border bg-background/60 px-3 py-2 text-sm uppercase outline-none ${
+                  referral && !referralOk ? "border-rose-500/50" : "border-border focus:border-primary"
+                }`}
+              />
+              {referralOk ? (
+                <p className="mt-2 text-xs font-medium text-emerald-300">
+                  20% off applied — you pay {formatNaira(payable)} instead of {formatNaira(selected.priceNaira)}.
+                </p>
+              ) : referral ? (
+                <p className="mt-2 text-xs text-rose-300">That referral code is not valid.</p>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">Have a referral code? Enter it to get 20% off.</p>
+              )}
+            </div>
+
 
             <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
               <b>Important:</b> Use your Augur email <span className="font-mono">{user.email}</span> as the narration/description
