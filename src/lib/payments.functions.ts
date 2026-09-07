@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { makeReferenceCode, REFERENCE_REGEX } from "@/lib/payments-config";
+import { makeReferenceCode, REFERENCE_REGEX, isValidReferral, priceFor } from "@/lib/payments-config";
 
 const planSchema = z.enum(["lecturer_monthly", "lecturer_yearly", "pro_monthly", "pro_yearly"]);
 
@@ -17,6 +17,7 @@ const submitSchema = z.object({
     .max(400)
     .regex(ALLOWED_EXT, "Receipt must be an image (PNG/JPG/WEBP/HEIC) or a PDF"),
   referenceCode: z.string().trim().toUpperCase().regex(REFERENCE_REGEX, "Invalid payment reference").optional(),
+  referralCode: z.string().trim().max(40).optional(),
   senderName: z
     .string()
     .trim()
@@ -53,16 +54,21 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
 
     const reference = data.referenceCode ?? makeReferenceCode(userId);
 
+    // Price is recomputed on the server so the referral discount cannot be faked.
+    const referralValid = isValidReferral(data.referralCode);
+    const expected = priceFor(data.plan, data.referralCode);
+    const noteParts = [data.note?.trim(), referralValid ? `Referral code applied: ${data.referralCode!.trim().toUpperCase()} (20% off)` : null].filter(Boolean);
+
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
       .insert({
         user_id: userId,
         plan: data.plan,
-        amount_naira: data.amountNaira,
+        amount_naira: expected,
         receipt_path: data.receiptPath,
         reference_code: reference,
         sender_name: data.senderName ?? null,
-        note: data.note ?? null,
+        note: noteParts.length ? noteParts.join(" · ") : null,
         status: "pending",
       })
       .select()

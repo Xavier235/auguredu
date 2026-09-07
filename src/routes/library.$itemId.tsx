@@ -55,8 +55,9 @@ export const Route = createFileRoute("/library/$itemId")({
 
 function LibraryReader() {
   const { itemId } = useParams({ from: "/library/$itemId" });
-  const curated = getLibraryItem(itemId);
   const entry = resolveEntry(itemId);
+  // A catalogue slug may point at a hand-written reading; use it instead of asking the AI.
+  const curated = getLibraryItem(itemId) ?? (entry?.curatedId ? getLibraryItem(entry.curatedId) : null);
   const { user } = useAuth();
   const verify = useServerFn(verifyLibraryRead);
   const buildReading = useServerFn(generateCourseReading);
@@ -80,6 +81,7 @@ function LibraryReader() {
 
   const needsGeneration = !curated && !!entry;
   const [progress, setProgress] = useState(0);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     function onScroll() {
@@ -109,8 +111,9 @@ function LibraryReader() {
       .then((r) => {
         if (!cancelled) setGenerated(r as GeneratedReading);
       })
-      .catch((e: any) => {
-        if (!cancelled) setLoadError(e?.message ?? "Could not open this reading.");
+      .catch(() => {
+        if (!cancelled)
+          setLoadError(`The ${entry.code} notes did not finish loading. Tap retry and they will be written again.`);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -118,7 +121,7 @@ function LibraryReader() {
     return () => {
       cancelled = true;
     };
-  }, [itemId, user?.id]);
+  }, [itemId, user?.id, retry]);
 
   if (!curated && !entry) {
     return (
@@ -287,9 +290,15 @@ function LibraryReader() {
           </div>
         )}
 
-        {loadError && (
-          <div className="mt-8 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {loadError}
+        {loadError && !loading && (
+          <div className="glass mt-8 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+            <p>{loadError}</p>
+            <button
+              onClick={() => setRetry((n) => n + 1)}
+              className="mt-4 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
+            >
+              Retry
+            </button>
           </div>
         )}
 
