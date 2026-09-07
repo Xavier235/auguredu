@@ -215,7 +215,14 @@ function UpgradePage() {
                     {p.tier} · {p.period}
                   </span>
                 </div>
-                <div className="mb-1 font-display text-xl font-bold">{formatNaira(p.priceNaira)}</div>
+                <div className="mb-1 flex items-baseline gap-2 font-display text-xl font-bold">
+                  {formatNaira(priceFor(id, referral))}
+                  {referralOk && (
+                    <span className="text-xs font-normal text-muted-foreground line-through">
+                      {formatNaira(p.priceNaira)}
+                    </span>
+                  )}
+                </div>
                 <div className="mb-2 text-xs text-muted-foreground">per {p.period}</div>
                 <div className="text-sm">{p.blurb}</div>
                 <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
