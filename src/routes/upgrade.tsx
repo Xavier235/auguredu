@@ -68,6 +68,8 @@ function UpgradePage() {
   }, [user?.id, loading]);
 
   const selected = PLANS[plan];
+  const referralOk = isValidReferral(referral);
+  const payable = priceFor(plan, referral);
 
   async function copy(text: string, label: string) {
     try {
