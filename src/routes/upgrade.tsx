@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyPaymentRequests, submitPaymentRequest } from "@/lib/payments.functions";
-import { BANK_DETAILS, PLANS, PlanId, formatNaira } from "@/lib/payments-config";
+import { BANK_DETAILS, PLANS, PlanId, formatNaira, isValidReferral, priceFor, REFERRAL_CODE } from "@/lib/payments-config";
 import { toast } from "sonner";
 import { Copy, Upload, Check, Clock, X as XIcon, Crown, ShieldCheck, ArrowRight } from "lucide-react";
 
@@ -40,6 +40,7 @@ function UpgradePage() {
   const [plan, setPlan] = useState<PlanId>("pro_monthly");
   const [senderName, setSenderName] = useState("");
   const [note, setNote] = useState("");
+  const [referral, setReferral] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
