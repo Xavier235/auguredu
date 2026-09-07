@@ -55,8 +55,9 @@ export const Route = createFileRoute("/library/$itemId")({
 
 function LibraryReader() {
   const { itemId } = useParams({ from: "/library/$itemId" });
-  const curated = getLibraryItem(itemId);
   const entry = resolveEntry(itemId);
+  // A catalogue slug may point at a hand-written reading; use it instead of asking the AI.
+  const curated = getLibraryItem(itemId) ?? (entry?.curatedId ? getLibraryItem(entry.curatedId) : null);
   const { user } = useAuth();
   const verify = useServerFn(verifyLibraryRead);
   const buildReading = useServerFn(generateCourseReading);
