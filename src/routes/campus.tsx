@@ -192,7 +192,7 @@ function CampusPage() {
 
   const matches = useMemo(() => {
     return peers
-      .map((p) => ({ p, score: matchScore(me, p) }))
+      .map((p) => ({ p, ...matchDetail(me, p) }))
       .filter((m) => m.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 12);
