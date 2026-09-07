@@ -81,6 +81,7 @@ function LibraryReader() {
 
   const needsGeneration = !curated && !!entry;
   const [progress, setProgress] = useState(0);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     function onScroll() {
