@@ -121,7 +121,7 @@ function LibraryReader() {
     return () => {
       cancelled = true;
     };
-  }, [itemId, user?.id]);
+  }, [itemId, user?.id, retry]);
 
   if (!curated && !entry) {
     return (
