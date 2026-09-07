@@ -111,8 +111,9 @@ function LibraryReader() {
       .then((r) => {
         if (!cancelled) setGenerated(r as GeneratedReading);
       })
-      .catch((e: any) => {
-        if (!cancelled) setLoadError(e?.message ?? "Could not open this reading.");
+      .catch(() => {
+        if (!cancelled)
+          setLoadError(`The ${entry.code} notes did not finish loading. Tap retry and they will be written again.`);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
