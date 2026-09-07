@@ -242,7 +242,7 @@ function UpgradePage() {
           {/* Bank details */}
           <div className="glass rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl font-bold">Step 1 · Send {formatNaira(selected.priceNaira)}</h2>
+              <h2 className="font-display text-xl font-bold">Step 1 · Send {formatNaira(payable)}</h2>
               <span className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                 {selected.name}
               </span>
