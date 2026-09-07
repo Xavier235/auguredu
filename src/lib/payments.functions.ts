@@ -54,16 +54,21 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
 
     const reference = data.referenceCode ?? makeReferenceCode(userId);
 
+    // Price is recomputed on the server so the referral discount cannot be faked.
+    const referralValid = isValidReferral(data.referralCode);
+    const expected = priceFor(data.plan, data.referralCode);
+    const noteParts = [data.note?.trim(), referralValid ? `Referral code applied: ${data.referralCode!.trim().toUpperCase()} (20% off)` : null].filter(Boolean);
+
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
       .insert({
         user_id: userId,
         plan: data.plan,
-        amount_naira: data.amountNaira,
+        amount_naira: expected,
         receipt_path: data.receiptPath,
         reference_code: reference,
         sender_name: data.senderName ?? null,
-        note: data.note ?? null,
+        note: noteParts.length ? noteParts.join(" · ") : null,
         status: "pending",
       })
       .select()
