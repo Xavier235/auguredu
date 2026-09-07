@@ -146,10 +146,11 @@ function UpgradePage() {
       await submit({
         data: {
           plan,
-          amountNaira: selected.priceNaira,
+          amountNaira: payable,
           receiptPath: path,
           senderName: trimmedSender,
           note: note.trim() || undefined,
+          referralCode: referral.trim() || undefined,
         },
       });
       toast.success("Receipt submitted — you'll get access as soon as we verify (usually within a few hours).");
