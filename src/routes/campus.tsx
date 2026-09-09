@@ -2,12 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { GroupChat } from "@/components/group-chat";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { pageMeta, canonical } from "@/lib/seo";
 import { DEPARTMENTS } from "@/lib/course-catalogue";
+import { SCHOOLS, areasFor, schoolByName } from "@/lib/campus-data";
 import { toast } from "sonner";
-import { Users, MapPin, Clock, Save, Plus, LogIn, LogOut, Loader2, Sparkles } from "lucide-react";
+import { Users, MapPin, Clock, Save, Plus, LogIn, LogOut, Loader2, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
 
 export const Route = createFileRoute("/campus")({
   head: () => ({
