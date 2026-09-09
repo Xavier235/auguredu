@@ -274,12 +274,23 @@ function CampusPage() {
               <div className="mt-4 grid gap-3">
                 <label className="text-sm">
                   <span className="text-muted-foreground">School</span>
-                  <input
+                  <select
                     value={me.school}
                     onChange={(e) => setMe({ ...me, school: e.target.value })}
-                    placeholder="e.g. Lagos State University"
                     className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
+                  >
+                    <option value="">Choose your university</option>
+                    {SCHOOLS.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.short})
+                      </option>
+                    ))}
+                  </select>
+                  {mySchool && (
+                    <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <GraduationCap className="h-3 w-3" /> {mySchool.type} · {mySchool.state} State
+                    </span>
+                  )}
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm">
