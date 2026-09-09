@@ -34,6 +34,15 @@ const STYLES = [
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const GOALS = [
+  "First class",
+  "Second class upper",
+  "Pull my CGPA back up",
+  "Pass every carryover",
+  "Prepare for professional exams",
+  "Final year project support",
+];
+
 type Profile = {
   user_id: string;
   school: string;
