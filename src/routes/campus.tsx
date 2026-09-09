@@ -323,15 +323,70 @@ function CampusPage() {
                     </select>
                   </label>
                 </div>
+                <label className="text-sm">
+                  <span className="text-muted-foreground">Course codes you are taking</span>
+                  <input
+                    value={me.courses}
+                    onChange={(e) => setMe({ ...me, courses: e.target.value })}
+                    placeholder="e.g. CSC 201, MTH 201, GST 202"
+                    className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm uppercase outline-none focus:border-primary"
+                  />
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                    Separate with commas. Shared courses give the strongest matches.
+                  </span>
+                </label>
+                <label className="text-sm">
+                  <span className="text-muted-foreground">What you are chasing this semester</span>
+                  <select
+                    value={me.goal}
+                    onChange={(e) => setMe({ ...me, goal: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="">Choose a goal</option>
+                    {GOALS.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Days you are free to read together</span>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {DAYS.map((d) => {
+                      const on = myDays.includes(d.toUpperCase());
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => toggleDay(d)}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                            on
+                              ? "border-primary bg-primary/15 text-primary"
+                              : "border-border text-muted-foreground hover:bg-surface/60"
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm">
                     <span className="text-muted-foreground">Campus area</span>
-                    <input
+                    <select
                       value={me.campus_area}
                       onChange={(e) => setMe({ ...me, campus_area: e.target.value })}
-                      placeholder="e.g. Ojo main campus"
                       className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
+                    >
+                      <option value="">Choose</option>
+                      {areasFor(mySchool?.id).map((a) => (
+                        <option key={a} value={a}>
+                          {a}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="text-sm">
                     <span className="text-muted-foreground">Hostel or area you stay</span>
