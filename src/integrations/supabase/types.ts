@@ -383,6 +383,41 @@ export type Database = {
           },
         ]
       }
+      study_group_messages: {
+        Row: {
+          body: string
+          created_at: string
+          group_id: string
+          id: string
+          sender_name: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          group_id: string
+          id?: string
+          sender_name?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          sender_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_groups: {
         Row: {
           capacity: number
@@ -617,6 +652,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
       my_usage_today: {

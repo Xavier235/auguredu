@@ -263,7 +263,7 @@ function UpgradePage() {
               <input
                 value={referral}
                 onChange={(e) => setReferral(e.target.value)}
-                placeholder={`e.g. ${REFERRAL_CODE}`}
+                placeholder="Enter code"
                 className={`w-full rounded-xl border bg-background/60 px-3 py-2 text-sm uppercase outline-none ${
                   referral && !referralOk ? "border-rose-500/50" : "border-border focus:border-primary"
                 }`}

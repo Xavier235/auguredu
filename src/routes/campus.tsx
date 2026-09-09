@@ -2,12 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { GroupChat } from "@/components/group-chat";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { pageMeta, canonical } from "@/lib/seo";
 import { DEPARTMENTS } from "@/lib/course-catalogue";
+import { SCHOOLS, areasFor, schoolByName } from "@/lib/campus-data";
 import { toast } from "sonner";
-import { Users, MapPin, Clock, Save, Plus, LogIn, LogOut, Loader2, Sparkles } from "lucide-react";
+import { Users, MapPin, Clock, Save, Plus, LogIn, LogOut, Loader2, Sparkles, MessageCircle, GraduationCap } from "lucide-react";
 
 export const Route = createFileRoute("/campus")({
   head: () => ({
@@ -31,6 +33,15 @@ const STYLES = [
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const GOALS = [
+  "First class",
+  "Second class upper",
+  "Pull my CGPA back up",
+  "Pass every carryover",
+  "Prepare for professional exams",
+  "Final year project support",
+];
 
 type Profile = {
   user_id: string;
@@ -272,12 +283,23 @@ function CampusPage() {
               <div className="mt-4 grid gap-3">
                 <label className="text-sm">
                   <span className="text-muted-foreground">School</span>
-                  <input
+                  <select
                     value={me.school}
                     onChange={(e) => setMe({ ...me, school: e.target.value })}
-                    placeholder="e.g. Lagos State University"
                     className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
+                  >
+                    <option value="">Choose your university</option>
+                    {SCHOOLS.map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({s.short})
+                      </option>
+                    ))}
+                  </select>
+                  {mySchool && (
+                    <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <GraduationCap className="h-3 w-3" /> {mySchool.type} · {mySchool.state} State
+                    </span>
+                  )}
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm">
@@ -310,15 +332,70 @@ function CampusPage() {
                     </select>
                   </label>
                 </div>
+                <label className="text-sm">
+                  <span className="text-muted-foreground">Course codes you are taking</span>
+                  <input
+                    value={me.courses}
+                    onChange={(e) => setMe({ ...me, courses: e.target.value })}
+                    placeholder="e.g. CSC 201, MTH 201, GST 202"
+                    className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm uppercase outline-none focus:border-primary"
+                  />
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                    Separate with commas. Shared courses give the strongest matches.
+                  </span>
+                </label>
+                <label className="text-sm">
+                  <span className="text-muted-foreground">What you are chasing this semester</span>
+                  <select
+                    value={me.goal}
+                    onChange={(e) => setMe({ ...me, goal: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="">Choose a goal</option>
+                    {GOALS.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Days you are free to read together</span>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {DAYS.map((d) => {
+                      const on = myDays.includes(d.toUpperCase());
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => toggleDay(d)}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                            on
+                              ? "border-primary bg-primary/15 text-primary"
+                              : "border-border text-muted-foreground hover:bg-surface/60"
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm">
                     <span className="text-muted-foreground">Campus area</span>
-                    <input
+                    <select
                       value={me.campus_area}
                       onChange={(e) => setMe({ ...me, campus_area: e.target.value })}
-                      placeholder="e.g. Ojo main campus"
                       className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
+                    >
+                      <option value="">Choose</option>
+                      {areasFor(mySchool?.id).map((a) => (
+                        <option key={a} value={a}>
+                          {a}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="text-sm">
                     <span className="text-muted-foreground">Hostel or area you stay</span>
