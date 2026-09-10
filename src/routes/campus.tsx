@@ -163,6 +163,14 @@ function CampusPage() {
   const [myGroups, setMyGroups] = useState<string[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [creating, setCreating] = useState(false);
+
+  const mySchool = schoolByName(me.school);
+  const myDays = splitList(me.days);
+  const toggleDay = (day: string) => {
+    const d = day.trim().toUpperCase();
+    const next = myDays.includes(d) ? myDays.filter((x) => x !== d) : [...myDays, d];
+    setMe({ ...me, days: next.join(", ") });
+  };
   const [newGroup, setNewGroup] = useState({
     name: "",
     topic: "",
