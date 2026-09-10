@@ -79,6 +79,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_usage: {
+        Row: {
+          count: number
+          created_at: string
+          feature: string
+          last_used_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          feature: string
+          last_used_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          feature?: string
+          last_used_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       flashcards: {
         Row: {
           answer: string
@@ -478,7 +505,9 @@ export type Database = {
           hostel: string
           level: string
           school: string
+          stream: string
           study_style: string
+          track: string
           updated_at: string
           user_id: string
         }
@@ -496,7 +525,9 @@ export type Database = {
           hostel?: string
           level?: string
           school?: string
+          stream?: string
           study_style?: string
+          track?: string
           updated_at?: string
           user_id: string
         }
@@ -514,7 +545,9 @@ export type Database = {
           hostel?: string
           level?: string
           school?: string
+          stream?: string
           study_style?: string
+          track?: string
           updated_at?: string
           user_id?: string
         }
