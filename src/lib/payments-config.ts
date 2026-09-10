@@ -34,74 +34,81 @@ export function makeReferenceCode(userId: string) {
 
 export const PLANS: Record<
   PlanId,
-  { name: string; tier: "lecturer" | "pro"; period: "month" | "year"; priceNaira: number; blurb: string; perks: string[] }
+  {
+    name: string;
+    tier: "lecturer" | "pro";
+    period: "month" | "year";
+    priceNaira: number;
+    blurb: string;
+    perks: string[];
+    featured?: boolean;
+  }
 > = {
-  pro_monthly: {
-    name: "Pro — Monthly",
-    tier: "pro",
-    period: "month",
-    priceNaira: 25000,
-    blurb: "Unlimited AI Study Buddy, flashcards & PDF chat.",
-    perks: [
-      "Unlimited AI Study Buddy chat",
-      "Unlimited flashcards from PDFs & images",
-      "PDF & image uploads in chat",
-      "Priority AI responses",
-    ],
-  },
-  pro_yearly: {
-    name: "Pro — Yearly",
-    tier: "pro",
-    period: "year",
-    priceNaira: 100000,
-    blurb: "Save ₦200,000 vs monthly — best value for a full academic session.",
-    perks: [
-      "Everything in Pro Monthly",
-      "Save ₦200,000 vs monthly billing",
-      "Priority AI responses & faster queue",
-      "Early access to new predictors & tools",
-      "Advanced CGPA scenario planner",
-      "Exportable PDF study reports",
-      "Priority support (24h response)",
-    ],
-  },
   lecturer_monthly: {
-    name: "Professor Access — Monthly",
+    name: "Lecturer Premium — Monthly",
     tier: "lecturer",
     period: "month",
-    priceNaira: 40000,
-    blurb: "Talk to a Nigerian university professor — worked examples, syllabus mapping and exam-style answers.",
+    priceNaira: 8000,
+    blurb: "Our flagship plan. A Nigerian lecturer in your pocket: worked examples, WAEC/NECO/JAMB drills and syllabus mapping.",
+    featured: true,
     perks: [
-      "Everything in Pro",
-      "Professor Chat — 30 questions per day",
-      "Worked examples & step-by-step solutions",
-      "Syllabus & course-code cross mapping",
+      "Everything in Basic",
+      "Lecturer chat with Augur — 30 questions a day",
+      "WAEC, NECO and JAMB drill modes",
+      "Live web look-ups for fresh exam news",
+      "Worked examples and step-by-step solutions",
       "Priority receipt review",
     ],
   },
   lecturer_yearly: {
-    name: "Professor Access — Yearly",
+    name: "Lecturer Premium — Yearly",
     tier: "lecturer",
     period: "year",
-    priceNaira: 160000,
-    blurb: "A full academic year of professor-level guidance. Save ₦320,000.",
+    priceNaira: 30000,
+    blurb: "A full year of lecturer-level guidance. Save ₦66,000 against paying monthly.",
+    featured: true,
     perks: [
-      "Everything in Professor Monthly",
-      "Save ₦320,000 vs monthly billing",
-      "Unlimited professor questions (fair-use)",
-      "Personal semester study coach",
+      "Everything in Lecturer Premium Monthly",
+      "Save ₦66,000 vs monthly billing",
+      "Unlimited lecturer questions (fair use)",
+      "Personal exam and semester coach",
       "Past-question walkthroughs on demand",
-      "Priority research & citation help",
-      "Direct WhatsApp escalation for urgent exam prep",
-      "Priority approval on receipts (under 1 hour)",
+      "Receipts approved within the hour",
+    ],
+  },
+  pro_monthly: {
+    name: "Basic — Monthly",
+    tier: "pro",
+    period: "month",
+    priceNaira: 5000,
+    blurb: "Unlimited Augur study chat, flashcards and PDF reading.",
+    perks: [
+      "Unlimited Augur study chat",
+      "Unlimited flashcards from PDFs and images",
+      "PDF and image uploads in chat",
+      "Faster responses",
+    ],
+  },
+  pro_yearly: {
+    name: "Basic — Yearly",
+    tier: "pro",
+    period: "year",
+    priceNaira: 25000,
+    blurb: "A full session of Basic. Save ₦35,000 against paying monthly.",
+    perks: [
+      "Everything in Basic Monthly",
+      "Save ₦35,000 vs monthly billing",
+      "Advanced CGPA scenario planner",
+      "Exportable PDF study reports",
+      "Early access to new tools",
     ],
   },
 };
 
 // ---- Referral discount -----------------------------------------------------
-// Students who enter this code on the upgrade page pay 20% less.
+// Students who enter this code on the upgrade page pay 50% less.
 export const REFERRAL_CODE = "FOUNTAIN TEENS";
-export const REFERRAL_DISCOUNT = 0.2;
+export const REFERRAL_DISCOUNT = 0.5;
 
 const normalise = (v: string) => v.trim().toUpperCase().replace(/\s+/g, " ");
 
@@ -121,6 +128,6 @@ export function formatNaira(n: number) {
 
 export function tierLabel(tier: string) {
   if (tier === "lecturer") return "Professor";
-  if (tier === "pro") return "Pro";
+  if (tier === "pro") return "Basic";
   return "Free";
 }
