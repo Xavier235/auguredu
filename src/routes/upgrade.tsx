@@ -37,7 +37,7 @@ function UpgradePage() {
   const listMine = useServerFn(listMyPaymentRequests);
   const submit = useServerFn(submitPaymentRequest);
 
-  const [plan, setPlan] = useState<PlanId>("pro_monthly");
+  const [plan, setPlan] = useState<PlanId>("lecturer_monthly");
   const [senderName, setSenderName] = useState("");
   const [note, setNote] = useState("");
   const [referral, setReferral] = useState("");
