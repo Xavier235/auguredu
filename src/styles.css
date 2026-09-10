@@ -46,10 +46,44 @@
   --color-glow: var(--glow);
 }
 
+/* Light — Daybreak Indigo */
 :root {
   --radius: 0.875rem;
 
-  /* Midnight Indigo */
+  --background: oklch(0.985 0.005 280);
+  --foreground: oklch(0.22 0.05 280);
+
+  --surface: oklch(0.965 0.012 280);
+  --surface-elevated: oklch(1 0 0);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.05 280);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.05 280);
+
+  --primary: oklch(0.52 0.22 275);
+  --primary-foreground: oklch(0.99 0.005 270);
+  --glow: oklch(0.66 0.2 275);
+
+  --secondary: oklch(0.93 0.02 280);
+  --secondary-foreground: oklch(0.25 0.06 280);
+
+  --muted: oklch(0.94 0.015 280);
+  --muted-foreground: oklch(0.48 0.04 280);
+
+  --accent: oklch(0.5 0.2 295);
+  --accent-foreground: oklch(0.99 0.005 270);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.99 0.005 270);
+
+  --border: oklch(0.86 0.02 280 / 0.9);
+  --input: oklch(0.9 0.02 280);
+  --ring: oklch(0.52 0.22 275);
+}
+
+/* Dark — Midnight Indigo */
+.dark {
   --background: oklch(0.12 0.04 280);
   --foreground: oklch(0.97 0.01 270);
 
@@ -82,11 +116,6 @@
   --ring: oklch(0.62 0.22 275);
 }
 
-.dark {
-  --background: oklch(0.12 0.04 280);
-  --foreground: oklch(0.97 0.01 270);
-}
-
 @layer base {
   * {
     border-color: var(--color-border);
@@ -99,11 +128,17 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.75 0.12 275 / 0.28), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, oklch(0.8 0.12 295 / 0.2), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 90%, oklch(0.8 0.1 260 / 0.22), transparent 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .dark body {
+    background-image:
       radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.35 0.18 275 / 0.45), transparent 60%),
       radial-gradient(ellipse 60% 50% at 90% 100%, oklch(0.4 0.2 295 / 0.25), transparent 60%),
       radial-gradient(ellipse 50% 40% at 10% 90%, oklch(0.3 0.15 260 / 0.3), transparent 60%);
-    background-attachment: fixed;
-    min-height: 100vh;
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
