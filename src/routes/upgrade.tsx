@@ -205,14 +205,19 @@ function UpgradePage() {
               <button
                 key={id}
                 onClick={() => setPlan(id)}
-                className={`glass rounded-2xl p-4 text-left transition ${
+                className={`glass relative rounded-2xl p-4 text-left transition ${
                   active ? "ring-2 ring-primary glow-primary" : "hover:ring-1 hover:ring-border"
-                }`}
+                } ${p.featured ? "border border-amber-300/40" : ""}`}
               >
+                {p.featured && (
+                  <span className="absolute -top-2 right-3 rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-black">
+                    Most popular
+                  </span>
+                )}
                 <div className="mb-2 flex items-center gap-2">
                   <Crown className={`h-4 w-4 ${p.tier === "lecturer" ? "text-amber-300" : "text-primary"}`} />
                   <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {p.tier} · {p.period}
+                    {p.tier === "lecturer" ? "Lecturer Premium" : "Basic"} · {p.period}
                   </span>
                 </div>
                 <div className="mb-1 flex items-baseline gap-2 font-display text-xl font-bold">
