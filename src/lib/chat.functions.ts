@@ -139,6 +139,101 @@ async function signAttachment(
   return data?.signedUrl ?? null;
 }
 
+// -------- Live web knowledge --------
+
+const FRESH_HINTS = [
+  "latest", "today", "this year", "current", "news", "2025", "2026", "2027",
+  "cut off", "cutoff", "registration", "deadline", "timetable", "date", "when is",
+  "waec", "neco", "jamb", "utme", "post utme", "syllabus", "result", "price",
+];
+
+function needsWeb(question: string) {
+  const q = question.toLowerCase();
+  return FRESH_HINTS.some((h) => q.includes(h));
+}
+
+function stripTags(html: string) {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+type WebHit = { title: string; snippet: string; url: string };
+
+/** Free, keyless web lookup: DuckDuckGo HTML with a Wikipedia fallback. */
+export async function webLookup(query: string, limit = 5): Promise<WebHit[]> {
+  const hits: WebHit[] = [];
+  try {
+    const res = await fetch("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query), {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; AugurEdu/1.0)" },
+    });
+    if (res.ok) {
+      const html = await res.text();
+      const blocks = html.split('class="result__body"').slice(1, limit + 3);
+      for (const b of blocks) {
+        const linkMatch = b.match(/result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+        const snipMatch = b.match(/result__snippet"[^>]*>([\s\S]*?)<\/a>/);
+        if (!linkMatch) continue;
+        let url = linkMatch[1];
+        const uddg = url.match(/uddg=([^&]+)/);
+        if (uddg) url = decodeURIComponent(uddg[1]);
+        hits.push({
+          title: stripTags(linkMatch[2]).slice(0, 160),
+          snippet: stripTags(snipMatch?.[1] ?? "").slice(0, 400),
+          url,
+        });
+        if (hits.length >= limit) break;
+      }
+    }
+  } catch {
+    // fall through to Wikipedia
+  }
+
+  if (hits.length === 0) {
+    try {
+      const res = await fetch(
+        "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=" +
+          limit +
+          "&srsearch=" +
+          encodeURIComponent(query),
+      );
+      if (res.ok) {
+        const data: any = await res.json();
+        for (const r of data?.query?.search ?? []) {
+          hits.push({
+            title: r.title,
+            snippet: stripTags(r.snippet ?? "").slice(0, 400),
+            url: "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(r.title).replace(/ /g, "_")),
+          });
+        }
+      }
+    } catch {
+      // no live data available
+    }
+  }
+  return hits;
+}
+
+async function webContext(question: string, mode: string) {
+  const wanted = needsWeb(question) || mode === "waec" || mode === "neco" || mode === "pastq";
+  if (!wanted) return "";
+  const hits = await webLookup(question, 5);
+  if (hits.length === 0) {
+    return "\n\nLIVE WEB LOOKUP: nothing usable came back this time. Answer from what you know and tell the student plainly that you could not check the internet just now.";
+  }
+  return (
+    "\n\nLIVE WEB RESULTS fetched just now for this question. Use them for anything current or factual, quote figures carefully, and list the sources you actually used at the end under a short line that says Sources, one per line as title then link.\n" +
+    hits.map((h, i) => `${i + 1}. ${h.title}\n${h.snippet}\n${h.url}`).join("\n\n")
+  );
+}
+
 // -------- Who the student is, and what Augur remembers about them --------
 
 /**
@@ -357,7 +452,9 @@ export const sendChatMessage = createServerFn({ method: "POST" })
 
     const who = await studentContext(supabase, userId);
 
-    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], who, libraryHint(data.content)]
+    const live = await webContext(data.content, data.mode);
+
+    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], who, libraryHint(data.content), live]
       .filter(Boolean)
       .join("\n\n");
     const messages: ChatMsg[] = [{ role: "system", content: systemContent }];
@@ -733,4 +830,41 @@ export const getMyProfileBadges = createServerFn({ method: "GET" })
       display_name: null,
       avatar_url: null,
     };
+  });
+
+
+// -------- What the student actually uses --------
+
+export const logFeatureUse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ feature: z.string().min(1).max(40) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: existing } = await (supabase as any)
+      .from("feature_usage")
+      .select("count")
+      .eq("user_id", userId)
+      .eq("feature", data.feature)
+      .maybeSingle();
+    await (supabase as any).from("feature_usage").upsert(
+      {
+        user_id: userId,
+        feature: data.feature,
+        count: ((existing as any)?.count ?? 0) + 1,
+        last_used_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,feature" },
+    );
+    return { ok: true };
+  });
+
+export const getMyFeatureUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await (context.supabase as any)
+      .from("feature_usage")
+      .select("feature, count, last_used_at")
+      .eq("user_id", context.userId)
+      .order("count", { ascending: false });
+    return { usage: (data as any[]) ?? [] };
   });
