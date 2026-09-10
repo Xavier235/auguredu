@@ -27,9 +27,18 @@ function libraryHint(question: string) {
     .join("\n")}`;
 }
 
+export const TRACK_LABELS: Record<string, string> = {
+  jamb: "JAMB / UTME candidate preparing for university admission",
+  waec: "WAEC (WASSCE) candidate",
+  neco: "NECO (SSCE) candidate",
+  university: "Nigerian university student",
+};
+
 export const CHAT_MODES = {
   "study-buddy": "General study help",
   drill: "JAMB / Post UTME drill",
+  waec: "WAEC drill",
+  neco: "NECO drill",
   blueprint: "A grade blueprint",
   paper: "Term paper and lab reports",
   pastq: "Past questions",
@@ -44,11 +53,15 @@ const MODE_PROMPTS: Record<ChatMode, string> = {
     "A GRADE BLUEPRINT MODE. Build a day by day study breakdown that gets the student to an A in the course or exam they name. Ask for their available hours per day and the exam date if not given. Output a numbered day by day plan with the exact topic, the practice task and the checkpoint for each day, then a weekly revision loop and a final week strategy.",
   paper:
     "ACADEMIC WRITING MODE. Guide the student on structuring term papers, seminar papers, projects and engineering or science laboratory reports to Nigerian university standards. Give the exact section order, what belongs in each section, word budgets, referencing style (APA or IEEE as appropriate), common marks lost, and a worked outline for their topic.",
+  waec:
+    "WAEC DRILL MODE. Act as a WASSCE examiner and drill master for the West African Examinations Council. Work strictly from the WAEC syllabus for the subject the student names and their stream (science, commercial or art). Ask one past question style item at a time: objectives get four options A to D, theory gets the exact WAEC phrasing and mark allocation in brackets. Wait for the answer, mark it the way a WAEC examiner marks (point by point, showing where marks are won and lost), explain the correct reasoning in two or three lines, keep a running score, then ask the next one. Mention the year or paper a pattern typically comes from only when you are confident, otherwise say it is a practice item in the WAEC style.",
+  neco:
+    "NECO DRILL MODE. Act as a NECO (National Examinations Council) examiner and drill master for the SSCE. Work strictly from the NECO syllabus for the subject the student names and their stream. Note where NECO differs from WAEC in phrasing, spread of topics and marking. Ask one past question style item at a time, four options A to D for objectives, correct mark allocation for theory. Mark, explain briefly, keep a running score, then continue. Label anything you generate as a practice item in the NECO style rather than claiming it is a verbatim past paper.",
   pastq:
     "PAST QUESTIONS MODE. Reconstruct the recurring past question patterns for the course code or JAMB subject the student names, based on how Nigerian universities and JAMB have examined it. Present five to eight likely questions grouped by topic, note how often each pattern repeats, then give model answers or full solutions when asked.",
 };
 
-const SYSTEM_PROMPT = `You are Augur, a friendly Nigerian university study buddy. You help students with JAMB prep, coursework, CGPA planning, past questions and study skills. You know Nigerian university course codes (for example MTH 101, CSC 202, GST 105) and reference them precisely. You are connected to the Augur library at /library, which holds every NUC course code with full readable notes, so point students there for deep reading and reading XP. Keep answers focused and practical.
+const SYSTEM_PROMPT = `You are Augur, a friendly Nigerian university study buddy. You help students with JAMB prep, coursework, CGPA planning, past questions and study skills. You know Nigerian university course codes (for example MTH 101, CSC 202, GST 105) and reference them precisely. You know the Nigerian exam boards deeply: WAEC (WASSCE), NECO (SSCE) and JAMB (UTME) — their syllabuses, paper structures, objective and theory split, marking schemes, grading bands (A1 to F9 for WAEC and NECO), subject combinations for science, commercial and art students, and the recurring question patterns per subject. You also know Nigerian university coursework. You are connected to the Augur library at /library, which holds every NUC course code with full readable notes, so point students there for deep reading and reading XP. Keep answers focused and practical.
 
 ${STYLE_RULES}`;
 
@@ -134,13 +147,14 @@ async function signAttachment(
  * memory Augur has written about them across every past conversation.
  */
 async function studentContext(supabase: any, userId: string) {
-  const [prof, study, xp, reads, mem, preds] = await Promise.all([
+  const [prof, study, xp, reads, mem, preds, usage] = await Promise.all([
     supabase.from("profiles").select("display_name, school, level, bio, is_verified_student, subscription_tier").eq("id", userId).maybeSingle(),
-    supabase.from("study_profiles").select("school, department, level, study_style, availability, about, courses, goal").eq("user_id", userId).maybeSingle(),
+    supabase.from("study_profiles").select("school, department, level, study_style, availability, about, courses, goal, track, stream").eq("user_id", userId).maybeSingle(),
     supabase.from("user_xp").select("xp, level").eq("user_id", userId).maybeSingle(),
     supabase.from("library_reads").select("item_title, department, level, verified").eq("user_id", userId).order("updated_at", { ascending: false }).limit(8),
     supabase.from("user_memory").select("summary").eq("user_id", userId).maybeSingle(),
     supabase.from("predictions").select("label, jamb_score, top_course, top_course_chance").eq("user_id", userId).order("created_at", { ascending: false }).limit(2),
+    supabase.from("feature_usage").select("feature, count").eq("user_id", userId).order("count", { ascending: false }).limit(8),
   ]);
 
   const p = prof?.data ?? {};
@@ -148,6 +162,8 @@ async function studentContext(supabase: any, userId: string) {
   const lines: string[] = [];
   if (p.display_name) lines.push(`Name: ${p.display_name}`);
   if (p.school || s.school) lines.push(`School: ${p.school || s.school}`);
+  if (s.track) lines.push(`They are a ${TRACK_LABELS[s.track as string] ?? s.track}.`);
+  if (s.stream) lines.push(`Subject stream: ${s.stream}`);
   if (s.department) lines.push(`Department: ${s.department}`);
   if (p.level || s.level) lines.push(`Level: ${p.level || s.level}`);
   if (s.courses) lines.push(`Current courses: ${s.courses}`);
@@ -173,6 +189,15 @@ async function studentContext(supabase: any, userId: string) {
       `Admission predictions saved: ${predRows
         .map((r) => `${r.label ?? "prediction"} JAMB ${r.jamb_score}, best fit ${r.top_course ?? "n/a"} at ${r.top_course_chance ?? 0}%`)
         .join("; ")}`,
+    );
+  }
+
+  const usageRows = ((usage?.data as any[]) ?? []).filter((r) => r.count > 0);
+  if (usageRows.length) {
+    lines.push(
+      `How they actually use Augur (most used first): ${usageRows
+        .map((r) => `${r.feature} x${r.count}`)
+        .join(", ")}. Lean into the tools they already use, and suggest the ones they never touch only when it clearly helps.`,
     );
   }
 
@@ -293,7 +318,7 @@ const sendSchema = z.object({
     )
     .default([]),
   mode: z
-    .enum(["study-buddy", "drill", "blueprint", "paper", "pastq"])
+    .enum(["study-buddy", "drill", "waec", "neco", "blueprint", "paper", "pastq"])
     .default("study-buddy"),
 });
 
