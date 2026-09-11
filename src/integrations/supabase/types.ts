@@ -79,6 +79,36 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+          sender_name?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: []
+      }
       feature_usage: {
         Row: {
           count: number
@@ -507,6 +537,7 @@ export type Database = {
           school: string
           stream: string
           study_style: string
+          subjects: string
           track: string
           updated_at: string
           user_id: string
@@ -527,6 +558,7 @@ export type Database = {
           school?: string
           stream?: string
           study_style?: string
+          subjects?: string
           track?: string
           updated_at?: string
           user_id: string
@@ -547,6 +579,7 @@ export type Database = {
           school?: string
           stream?: string
           study_style?: string
+          subjects?: string
           track?: string
           updated_at?: string
           user_id?: string
