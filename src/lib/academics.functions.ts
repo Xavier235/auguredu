@@ -55,9 +55,10 @@ export const generateExam = createServerFn({ method: "POST" })
     z
       .object({
         subject: z.string().min(2).max(80),
-        mode: z.enum(["jamb", "post-utme", "course"]),
+        mode: z.enum(["jamb", "waec", "neco", "post-utme", "course"]),
         count: z.number().int().min(5).max(40),
         difficulty: z.enum(["easy", "standard", "hard"]).default("standard"),
+        randomise: z.boolean().default(true),
       })
       .parse(d),
   )
@@ -65,22 +66,34 @@ export const generateExam = createServerFn({ method: "POST" })
     const framing =
       data.mode === "jamb"
         ? "Use real JAMB UTME syllabus topics and the exact JAMB question style and difficulty spread."
-        : data.mode === "post-utme"
-          ? "Use Nigerian university Post UTME screening style: short, fast, mixed use of English and the candidate's subject."
-          : "Use the Nigerian university course syllabus for this course code, first semester and second semester content, exactly as it is examined.";
+        : data.mode === "waec"
+          ? "Use the WAEC WASSCE syllabus and the exact WASSCE objective paper style. Study how WAEC has phrased this topic across past papers and write brand new questions that test the same concepts. Never reproduce a past paper word for word."
+          : data.mode === "neco"
+            ? "Use the NECO SSCE syllabus and the exact NECO objective paper style. Study how NECO has phrased this topic across past papers and write brand new questions that test the same concepts. Never reproduce a past paper word for word."
+            : data.mode === "post-utme"
+              ? "Use Nigerian university Post UTME screening style: short, fast, mixed use of English and the candidate's subject."
+              : "Use the Nigerian university course syllabus for this course code, first semester and second semester content, exactly as it is examined.";
+
+    // A rotating spread so the same subject never returns the same paper twice.
+    const seed = Math.random().toString(36).slice(2, 8);
 
     const parsed = await askJson(
       "You are a Nigerian examiner writing accurate computer based test questions with verified answers.",
       `Write ${data.count} multiple choice questions on: ${data.subject}.
 ${framing}
 Difficulty: ${data.difficulty}.
+${
+  data.randomise
+    ? `Paper reference ${seed}. Spread the questions across DIFFERENT topics of the syllabus and pick a different mix of topics, numbers and scenarios from any other paper you would normally write. Shuffle which option letter is correct.`
+    : ""
+}
 Every question must have exactly four options and one correct option. The explanation must be two or three lines and must justify the correct answer.
 
 Return ONLY JSON:
 {"title":"short exam title","questions":[{"q":"string","options":["a","b","c","d"],"answer":0,"explanation":"string","topic":"string"}]}`,
     );
 
-    const questions: ExamQuestion[] = (parsed?.questions ?? [])
+    let questions: ExamQuestion[] = (parsed?.questions ?? [])
       .filter((q: any) => q?.q && Array.isArray(q.options) && q.options.length === 4)
       .slice(0, data.count)
       .map((q: any) => ({
@@ -91,8 +104,26 @@ Return ONLY JSON:
         topic: clean(q.topic),
       }));
 
+    if (data.randomise) {
+      questions = questions
+        .map((q) => {
+          const idx = q.options.map((_, i) => i);
+          for (let i = idx.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [idx[i], idx[j]] = [idx[j]!, idx[i]!];
+          }
+          return {
+            ...q,
+            options: idx.map((i) => q.options[i]!),
+            answer: idx.indexOf(q.answer),
+          };
+        })
+        .sort(() => Math.random() - 0.5);
+    }
+
     if (questions.length === 0) throw new Error("Could not build that exam, please try another subject.");
     return { questions, title: clean(parsed?.title) || `${data.subject} practice test` };
+
   });
 
 // ---------------- Project topic generator + outline builder ----------------
