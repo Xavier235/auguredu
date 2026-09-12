@@ -109,6 +109,39 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_attempts: {
+        Row: {
+          board: string
+          created_at: string
+          id: string
+          score: number
+          subject: string
+          topics: Json
+          total: number
+          user_id: string
+        }
+        Insert: {
+          board?: string
+          created_at?: string
+          id?: string
+          score?: number
+          subject?: string
+          topics?: Json
+          total?: number
+          user_id: string
+        }
+        Update: {
+          board?: string
+          created_at?: string
+          id?: string
+          score?: number
+          subject?: string
+          topics?: Json
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_usage: {
         Row: {
           count: number
@@ -173,6 +206,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      igcse_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+        }
+        Relationships: []
       }
       library_reads: {
         Row: {
