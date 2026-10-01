@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { pageMeta, canonical, organisationJsonLd } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { IgcseWaitlist } from "@/components/igcse-waitlist";
 import {
   ArrowRight,
   Brain,
@@ -15,7 +16,7 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: pageMeta({
-      title: "Augur.edu — Nigerian Admission & CGPA Predictor",
+      title: "Augur.edu — Learn JAMB, WAEC, NECO and University Courses",
       description:
         "Predict your admission chances at any Nigerian university, forecast your CGPA and study every NUC course with an AI study buddy.",
       path: "/",
@@ -49,6 +50,13 @@ function Home() {
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
               Augur reads your habits, scores, and ambitions — and tells you, with cold clarity, where you're headed and what to change.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {["JAMB", "WAEC", "NECO", "University courses"].map((t) => (
+                <span key={t} className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  Learn {t}
+                </span>
+              ))}
+            </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -241,6 +249,7 @@ function Home() {
             </div>
           </div>
         </section>
+        <IgcseWaitlist />
       </main>
 
       <SiteFooter />

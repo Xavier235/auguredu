@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GroupChat } from "@/components/group-chat";
+import { DirectChat } from "@/components/direct-chat";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { pageMeta, canonical } from "@/lib/seo";
@@ -58,6 +59,8 @@ type Profile = {
   courses: string;
   goal: string;
   days: string;
+  track?: string;
+  stream?: string;
 };
 
 type Group = {
@@ -124,6 +127,15 @@ function matchDetail(me: Profile, other: Profile) {
   if (me.school && other.school && me.school.toLowerCase() === other.school.toLowerCase()) {
     s += 15;
     reasons.push("Same school");
+  }
+
+  if (me.track && me.track === other.track) {
+    s += 20;
+    reasons.push(`Both ${other.track === "university" ? "university students" : other.track.toUpperCase() + " candidates"}`);
+  }
+  if (me.stream && me.stream === other.stream) {
+    s += 10;
+    reasons.push(`Same ${other.stream} stream`);
   }
 
   const myDays = splitList(me.days);
@@ -209,6 +221,7 @@ function CampusPage() {
     load();
   }, [load]);
 
+  const [dmWith, setDmWith] = useState<string | null>(null);
   const matches = useMemo(() => {
     return peers
       .map((p) => ({ p, ...matchDetail(me, p) }))
@@ -512,6 +525,19 @@ function CampusPage() {
                           )}
                           {p.contact_handle && <span>Reach: {p.contact_handle}</span>}
                         </p>
+                        {user && (dmWith === p.user_id ? (
+                          <DirectChat
+                            userId={user.id}
+                            peerId={p.user_id}
+                            peerLabel={p.department || "your match"}
+                            senderName={user.email?.split("@")[0] ?? "Student"}
+                            onClose={() => setDmWith(null)}
+                          />
+                        ) : (
+                          <button onClick={() => setDmWith(p.user_id)} className="mt-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                            Message
+                          </button>
+                        ))}
                       </div>
                     ))}
                   </div>
