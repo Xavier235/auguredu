@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeaknessRouteImport } from './routes/weakness'
 import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as StudyPlanRouteImport } from './routes/study-plan'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -31,6 +32,11 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as ApiVoiceTranscribeRouteImport } from './routes/api/voice/transcribe'
 import { Route as ApiVoiceSpeakRouteImport } from './routes/api/voice/speak'
 
+const WeaknessRoute = WeaknessRouteImport.update({
+  id: '/weakness',
+  path: '/weakness',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
   path: '/upgrade',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/weakness': typeof WeaknessRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/weakness': typeof WeaknessRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/study-plan': typeof StudyPlanRoute
   '/upgrade': typeof UpgradeRoute
+  '/weakness': typeof WeaknessRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/library/$itemId': typeof LibraryItemIdRoute
   '/read/$pdfId': typeof ReadPdfIdRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/study-plan'
     | '/upgrade'
+    | '/weakness'
     | '/admin/payments'
     | '/library/$itemId'
     | '/read/$pdfId'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/study-plan'
     | '/upgrade'
+    | '/weakness'
     | '/admin/payments'
     | '/library/$itemId'
     | '/read/$pdfId'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/study-plan'
     | '/upgrade'
+    | '/weakness'
     | '/admin/payments'
     | '/library/$itemId'
     | '/read/$pdfId'
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StudyPlanRoute: typeof StudyPlanRoute
   UpgradeRoute: typeof UpgradeRoute
+  WeaknessRoute: typeof WeaknessRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   LibraryItemIdRoute: typeof LibraryItemIdRoute
   ReadPdfIdRoute: typeof ReadPdfIdRoute
@@ -305,6 +318,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/weakness': {
+      id: '/weakness'
+      path: '/weakness'
+      fullPath: '/weakness'
+      preLoaderRoute: typeof WeaknessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upgrade': {
       id: '/upgrade'
       path: '/upgrade'
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StudyPlanRoute: StudyPlanRoute,
   UpgradeRoute: UpgradeRoute,
+  WeaknessRoute: WeaknessRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   LibraryItemIdRoute: LibraryItemIdRoute,
   ReadPdfIdRoute: ReadPdfIdRoute,
