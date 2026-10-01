@@ -11,6 +11,9 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { PaymentNotifier } from "@/components/payment-notifier";
+import { AugurBubble } from "@/components/augur-bubble";
+import { ThemeProvider } from "@/hooks/use-theme";
+import { Toaster } from "@/components/ui/sonner";
 
 
 function NotFoundComponent() {
@@ -95,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -113,10 +116,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
 
-      <AuthProvider>
-        <PaymentNotifier />
-        <Outlet />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <PaymentNotifier />
+          <Outlet />
+          <AugurBubble />
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -57,7 +57,7 @@ export const submitPaymentRequest = createServerFn({ method: "POST" })
     // Price is recomputed on the server so the referral discount cannot be faked.
     const referralValid = isValidReferral(data.referralCode);
     const expected = priceFor(data.plan, data.referralCode);
-    const noteParts = [data.note?.trim(), referralValid ? `Referral code applied: ${data.referralCode!.trim().toUpperCase()} (20% off)` : null].filter(Boolean);
+    const noteParts = [data.note?.trim(), referralValid ? `Referral code applied: ${data.referralCode!.trim().toUpperCase()} (60% off)` : null].filter(Boolean);
 
     const { data: row, error } = await (supabase as any)
       .from("payment_requests")
