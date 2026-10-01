@@ -1,3 +1,4 @@
+import { TrackSetup } from "@/components/track-setup";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
@@ -225,6 +226,7 @@ function ProfilePage() {
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-6 pt-12 pb-20">
+        <div className="mb-8"><TrackSetup /></div>
         {/* Profile header card */}
         <div className="glass relative overflow-hidden rounded-3xl p-6 md:p-8">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />

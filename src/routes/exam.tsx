@@ -7,6 +7,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { generateExam, type ExamQuestion } from "@/lib/academics.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 import { toast } from "sonner";
+import { ExplainButton } from "@/components/explain-button";
+import { saveExamAttempt } from "@/lib/exam.functions";
+import { SSCE_SUBJECTS } from "@/lib/exam-library";
 import { Loader2, Timer, Play, RotateCcw, CheckCircle2, XCircle, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/exam")({
@@ -47,8 +50,10 @@ function fmt(s: number) {
 function ExamPage() {
   const { user } = useAuth();
   const build = useServerFn(generateExam);
+  const save = useServerFn(saveExamAttempt);
+  const [saved, setSaved] = useState(false);
 
-  const [mode, setMode] = useState<"jamb" | "post-utme" | "course">("jamb");
+  const [mode, setMode] = useState<"jamb" | "waec" | "neco" | "post-utme" | "course">("jamb");
   const [subject, setSubject] = useState("Use of English");
   const [custom, setCustom] = useState("");
   const [count, setCount] = useState(10);
@@ -85,6 +90,20 @@ function ExamPage() {
     return questions.reduce((n, q, i) => n + (answers[i] === q.answer ? 1 : 0), 0);
   }, [questions, answers]);
 
+  useEffect(() => {
+    if (!submitted || !questions || saved || !user) return;
+    setSaved(true);
+    const byTopic = new Map<string, { topic: string; correct: number; total: number }>();
+    questions.forEach((qq, i) => {
+      const k = (qq.topic || "General").slice(0, 120);
+      const t = byTopic.get(k) ?? { topic: k, correct: 0, total: 0 };
+      t.total++;
+      if (answers[i] === qq.answer) t.correct++;
+      byTopic.set(k, t);
+    });
+    save({ data: { board: mode, subject: topicName.slice(0, 120), score, total: questions.length, topics: Array.from(byTopic.values()).slice(0, 60) } }).catch(() => {});
+  }, [submitted]);
+
   const topicName = mode === "course" || custom.trim() ? custom.trim() || subject : subject;
 
   async function start() {
@@ -92,7 +111,7 @@ function ExamPage() {
       toast.error("Sign in to sit a practice test.");
       return;
     }
-    const s = mode === "jamb" && !custom.trim() ? subject : custom.trim();
+    const s = (mode === "jamb" || mode === "waec" || mode === "neco") && !custom.trim() ? subject : custom.trim();
     if (!s || s.length < 2) {
       toast.error(mode === "course" ? "Enter a course code, for example CSC 201." : "Choose or type a subject.");
       return;
@@ -105,6 +124,7 @@ function ExamPage() {
       setAnswers({});
       setIndex(0);
       setSubmitted(false);
+      setSaved(false);
       setLeft(r.questions.length * minutesPerQ * 60);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not start that test.");
@@ -129,7 +149,7 @@ function ExamPage() {
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         <h1 className="font-display text-3xl font-bold sm:text-4xl">Live CBT exam simulator</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Sit a real timed computer based test. Pick JAMB, Post UTME screening or any university course code, answer
+          Sit a real timed computer based test. Pick JAMB, WAEC, NECO, Post UTME screening or any university course code, answer
           under the clock, then see your score with a full explanation for every question.
         </p>
 
@@ -141,6 +161,8 @@ function ExamPage() {
                 {(
                   [
                     ["jamb", "JAMB UTME"],
+                    ["waec", "WAEC"],
+                    ["neco", "NECO"],
                     ["post-utme", "Post UTME"],
                     ["course", "University course"],
                   ] as const
@@ -159,15 +181,15 @@ function ExamPage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {mode === "jamb" && (
+              {(mode === "jamb" || mode === "waec" || mode === "neco") && (
                 <label className="text-sm">
-                  <span className="text-muted-foreground">JAMB subject</span>
+                  <span className="text-muted-foreground">{mode.toUpperCase()} subject</span>
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
                   >
-                    {JAMB_SUBJECTS.map((s) => (
+                    {(mode === "jamb" ? JAMB_SUBJECTS : SSCE_SUBJECTS).map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
@@ -287,6 +309,15 @@ function ExamPage() {
               ))}
             </div>
 
+            <ExplainButton
+              key={`hint-${index}`}
+              question={q.q}
+              options={q.options}
+              subject={topicName}
+              board={mode}
+              hintOnly
+            />
+
             <div className="mt-6 flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIndex((i) => Math.max(0, i - 1))}
@@ -353,8 +384,8 @@ function ExamPage() {
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> New test
                 </button>
-                <Link to="/study-plan" className="rounded-full border border-border px-5 py-2 text-sm font-semibold">
-                  Back to study plan
+                <Link to="/weakness" className="rounded-full border border-border px-5 py-2 text-sm font-semibold">
+                  My weakness report
                 </Link>
               </div>
             </div>
@@ -378,6 +409,14 @@ function ExamPage() {
                   </p>
                   <p className="mt-1 text-xs text-emerald-300">Correct: {qq.options[qq.answer]}</p>
                   <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{qq.explanation}</p>
+                  <ExplainButton
+                    question={qq.q}
+                    options={qq.options}
+                    correctIndex={qq.answer}
+                    chosenIndex={answers[i] ?? null}
+                    subject={topicName}
+                    board={mode}
+                  />
                 </div>
               );
             })}

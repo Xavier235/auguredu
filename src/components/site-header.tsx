@@ -5,11 +5,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { tierLabel } from "@/lib/payments-config";
 import { NotificationCenter } from "@/components/notification-center";
+import { useTheme } from "@/hooks/use-theme";
+import { Sun, Moon } from "lucide-react";
 
 export function SiteHeader() {
   const { location } = useRouterState();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -42,6 +45,7 @@ export function SiteHeader() {
       ? [
           { to: "/profile", label: "My profile" },
           { to: "/settings", label: "Settings" },
+          { to: "/weakness", label: "Weak spots" },
           ...(tier === "free" ? [{ to: "/upgrade", label: "Upgrade" }] : []),
         ]
       : []),
@@ -140,6 +144,14 @@ export function SiteHeader() {
             </Link>
           )}
         </div>
+
+        <button
+          onClick={toggle}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/50"
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
 
         {/* Mobile menu toggle */}
         <button

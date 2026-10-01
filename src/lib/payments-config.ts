@@ -87,6 +87,9 @@ export const PLANS: Record<
       "Unlimited flashcards from PDFs and images",
       "PDF and image uploads in chat",
       "Faster responses",
+      "WAEC, NECO and JAMB practice tests with explanations",
+      "Personal weakness report after every test",
+      "Campus match direct messages",
     ],
   },
   pro_yearly: {
@@ -106,9 +109,9 @@ export const PLANS: Record<
 };
 
 // ---- Referral discount -----------------------------------------------------
-// Students who enter this code on the upgrade page pay 50% less.
+// Students who enter this code on the upgrade page pay 60% less.
 export const REFERRAL_CODE = "FOUNTAIN TEENS";
-export const REFERRAL_DISCOUNT = 0.5;
+export const REFERRAL_DISCOUNT = 0.6;
 
 const normalise = (v: string) => v.trim().toUpperCase().replace(/\s+/g, " ");
 
