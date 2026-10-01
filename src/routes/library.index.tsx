@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@/hooks/use-auth";
+import { ExamPapers } from "@/components/exam-papers";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyLibraryReads } from "@/lib/library.functions";
 import { LIBRARY_INDEX, LIBRARY_DEPT_OPTIONS, LIBRARY_FACULTIES } from "@/lib/library-catalogue";
@@ -93,6 +94,8 @@ function LibraryPage() {
             your study plan.
           </p>
         </div>
+
+        <ExamPapers />
 
         <div className="glass mb-6 flex flex-wrap items-center gap-3 rounded-2xl p-4">
           <Filter className="h-4 w-4 text-muted-foreground" />
