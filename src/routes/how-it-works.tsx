@@ -96,6 +96,18 @@ function HowPage() {
           </Section>
         </div>
 
+        <section id="faq" className="mt-20">
+          <h2 className="font-display text-3xl font-semibold">Frequently asked questions</h2>
+          <div className="mt-6 space-y-3">
+            {FAQS.map(([q, a]) => (
+              <details key={q} className="glass group rounded-2xl p-5">
+                <summary className="cursor-pointer list-none font-medium">{q}</summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <div className="mt-20 rounded-3xl bg-gradient-to-br from-primary to-accent p-12 text-center">
           <h2 className="font-display text-3xl font-semibold text-primary-foreground md:text-4xl">
             Ready to see your forecast?
