@@ -32,7 +32,7 @@ function AuthPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/predictor" });
+    if (!loading && user) navigate({ to: "/" });
   }, [user, loading, navigate]);
 
   const emailInfo = classifyEmail(email);
@@ -48,17 +48,17 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/predictor`,
+            emailRedirectTo: `${window.location.origin}/`,
             data: { display_name: name },
           },
         });
         if (error) throw error;
-        toast.success("Account created — check your email to confirm.");
+        toast.success("Account created! Check your email to confirm, then sign in."); setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate({ to: "/predictor" });
+        navigate({ to: "/" });
       }
     } catch (err: unknown) {
       const msg = friendlyAuthError(err instanceof Error ? err.message : undefined);
@@ -73,7 +73,7 @@ function AuthPage() {
   const handleGoogle = async () => {
     setBusy(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/predictor",
+      redirect_uri: window.location.origin,
     });
     if (result.error) {
       toast.error(result.error.message ?? "Google sign-in failed");
@@ -81,7 +81,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/predictor" });
+    navigate({ to: "/" });
   };
 
   return (
