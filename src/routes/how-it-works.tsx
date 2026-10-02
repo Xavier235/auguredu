@@ -158,3 +158,13 @@ function Weights({ rows }: { rows: [string, number][] }) {
     </div>
   );
 }
+
+const FAQS: [string, string][] = [
+  ["Is Augur free?", "Yes. The predictors, CGPA forecaster, library and practice tests are free. Basic and Lecturer Premium unlock unlimited Augur chat, unlimited explanations and more."],
+  ["Which exams does Augur cover?", "JAMB UTME, WAEC, NECO, Post UTME and Nigerian university course codes. Set your track on your profile and Augur tailors everything to you."],
+  ["Are the practice questions copied from past papers?", "No. Augur studies how each exam board tests a topic and writes fresh questions on the same concepts, so every paper is new."],
+  ["How do I pay for premium?", "Open Upgrade, transfer to the Opay account shown, then upload your receipt. Access is switched on once the receipt is approved."],
+  ["How many free explanations do I get?", "Three a day on the free plan. Paid plans get unlimited explanations."],
+  ["How does campus match work?", "Augur pairs you with students on the same track, stream, school, department and free days. You can message matches directly or join a study group."],
+  ["How accurate are the predictions?", "They use each school's published formula and recent cut off marks. Treat them as a strong guide, not an official result."],
+];
