@@ -49,7 +49,7 @@ export function SiteHeader() {
           ...(tier === "free" ? [{ to: "/upgrade", label: "Upgrade" }] : []),
         ]
       : []),
-    { to: "/how-it-works", label: "How it works" },
+    { to: "/how-it-works", label: "How it works & FAQ" },
   ];
 
   function submitSearch(e: React.FormEvent) {
@@ -73,14 +73,14 @@ export function SiteHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="glass hidden items-center gap-1 rounded-full px-2 py-1.5 md:flex">
+        <nav className="glass hidden max-w-[60vw] items-center gap-1 overflow-x-auto rounded-full px-2 py-1.5 2xl:flex">
           {links.map((l) => {
             const active = location.pathname === l.to;
             return (
               <Link
                 key={l.to}
                 to={l.to}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
@@ -95,7 +95,7 @@ export function SiteHeader() {
         {/* Desktop search */}
         <form
           onSubmit={submitSearch}
-          className="hidden items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1.5 lg:flex"
+          className="hidden items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1.5 xl:flex"
         >
           <Search className="h-3.5 w-3.5 text-muted-foreground" />
           <input
@@ -107,7 +107,7 @@ export function SiteHeader() {
         </form>
 
         {/* Desktop auth */}
-        <div className="hidden md:block">
+        <div className="ml-auto hidden md:block">
           {user ? (
             <div className="flex items-center gap-2">
               <NotificationCenter />
@@ -148,7 +148,7 @@ export function SiteHeader() {
         <button
           onClick={toggle}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/50"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background/50"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
@@ -156,7 +156,7 @@ export function SiteHeader() {
         {/* Mobile menu toggle */}
         <button
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/50 md:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background/50 2xl:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
@@ -166,8 +166,8 @@ export function SiteHeader() {
 
       {/* Mobile drawer */}
       {open && (
-        <div className="md:hidden">
-          <div className="mx-4 mb-4 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur">
+        <div className="2xl:hidden">
+          <div className="mx-4 mb-4 max-h-[75vh] overflow-y-auto rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur">
             <form
               onSubmit={submitSearch}
               className="mb-3 flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-2"

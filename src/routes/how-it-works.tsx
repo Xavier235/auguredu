@@ -96,6 +96,18 @@ function HowPage() {
           </Section>
         </div>
 
+        <section id="faq" className="mt-20">
+          <h2 className="font-display text-3xl font-semibold">Frequently asked questions</h2>
+          <div className="mt-6 space-y-3">
+            {FAQS.map(([q, a]) => (
+              <details key={q} className="glass group rounded-2xl p-5">
+                <summary className="cursor-pointer list-none font-medium">{q}</summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <div className="mt-20 rounded-3xl bg-gradient-to-br from-primary to-accent p-12 text-center">
           <h2 className="font-display text-3xl font-semibold text-primary-foreground md:text-4xl">
             Ready to see your forecast?
@@ -146,3 +158,13 @@ function Weights({ rows }: { rows: [string, number][] }) {
     </div>
   );
 }
+
+const FAQS: [string, string][] = [
+  ["Is Augur free?", "Yes. The predictors, CGPA forecaster, library and practice tests are free. Basic and Lecturer Premium unlock unlimited Augur chat, unlimited explanations and more."],
+  ["Which exams does Augur cover?", "JAMB UTME, WAEC, NECO, Post UTME and Nigerian university course codes. Set your track on your profile and Augur tailors everything to you."],
+  ["Are the practice questions copied from past papers?", "No. Augur studies how each exam board tests a topic and writes fresh questions on the same concepts, so every paper is new."],
+  ["How do I pay for premium?", "Open Upgrade, transfer to the Opay account shown, then upload your receipt. Access is switched on once the receipt is approved."],
+  ["How many free explanations do I get?", "Three a day on the free plan. Paid plans get unlimited explanations."],
+  ["How does campus match work?", "Augur pairs you with students on the same track, stream, school, department and free days. You can message matches directly or join a study group."],
+  ["How accurate are the predictions?", "They use each school's published formula and recent cut off marks. Treat them as a strong guide, not an official result."],
+];

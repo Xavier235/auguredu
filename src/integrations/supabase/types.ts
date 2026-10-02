@@ -778,11 +778,19 @@ export type Database = {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
+      my_study_school: { Args: never; Returns: string }
       my_usage_today: {
         Args: never
         Returns: {
           count: number
           feature: string
+        }[]
+      }
+      study_group_counts: {
+        Args: never
+        Returns: {
+          group_id: string
+          members: number
         }[]
       }
     }

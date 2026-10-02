@@ -70,7 +70,7 @@ function Home() {
                 to="/how-it-works"
                 className="rounded-full border border-border px-7 py-3.5 text-sm font-medium text-foreground hover:bg-surface"
               >
-                How it works
+                How it works &amp; FAQ
               </Link>
             </div>
           </div>
