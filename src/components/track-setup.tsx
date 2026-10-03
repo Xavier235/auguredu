@@ -5,6 +5,7 @@ import { DEPARTMENTS } from "@/lib/course-catalogue";
 import { TRACKS, STREAMS, subjectsFor, splitSubjects } from "@/lib/track";
 import { toast } from "sonner";
 import { Loader2, Save, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const LEVELS = ["100", "200", "300", "400", "500", "600"];
 
@@ -21,6 +22,8 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
   const [department, setDepartment] = useState("");
   const [level, setLevel] = useState("100");
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [configured, setConfigured] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) return setLoading(false);
@@ -35,6 +38,7 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
     setDepartment(d.department ?? "");
     setLevel(d.level || "100");
     setSubjects(splitSubjects(d.subjects));
+    setConfigured(Boolean(d.track));
     setLoading(false);
   }, [user?.id]);
 
@@ -68,6 +72,8 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
     );
     setSaving(false);
     if (error) return toast.error(error.message);
+    setConfigured(true);
+    setEditing(false);
     toast.success("Saved. Augur will tailor everything to this.");
   }
 
@@ -87,21 +93,44 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3 w-3 animate-spin" /> Loading
         </div>
+      ) : configured && !editing ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background/60 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium">
+              {TRACKS.find((item) => item.id === track)?.label ?? "Student"}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {isUni
+                ? [department, `${level} level`].filter(Boolean).join(" · ")
+                : [STREAMS.find((item) => item.id === stream)?.label, ...subjects].filter(Boolean).join(" · ")}
+            </p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)}>
+            Change setup
+          </Button>
+        </div>
       ) : (
         <div className="mt-4 space-y-4">
           <div>
             <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">I am a</div>
             <div className="flex flex-wrap gap-2">
               {TRACKS.map((t) => (
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
                   key={t.id}
-                  onClick={() => setTrack(t.id)}
+                  onClick={() => {
+                    setTrack(t.id);
+                    setStream("");
+                    setSubjects([]);
+                  }}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
                     track === t.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/60"
                   }`}
                 >
                   {t.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -113,9 +142,15 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
               </div>
               <div className="flex flex-wrap gap-2">
                 {STREAMS.map((s) => (
-                  <button
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     key={s.id}
-                    onClick={() => setStream(s.id)}
+                    onClick={() => {
+                      setStream(s.id);
+                      setSubjects([]);
+                    }}
                     className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
                       stream === s.id
                         ? "border-primary bg-primary text-primary-foreground"
@@ -123,7 +158,7 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
                     }`}
                   >
                     {s.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -136,7 +171,10 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
               </div>
               <div className="flex flex-wrap gap-2">
                 {options.map((s) => (
-                  <button
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     key={s}
                     onClick={() => toggleSubject(s)}
                     className={`rounded-full border px-3 py-1 text-xs ${
@@ -146,7 +184,7 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
                     }`}
                   >
                     {s}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -188,14 +226,15 @@ export function TrackSetup({ compact = false }: { compact?: boolean }) {
             </div>
           )}
 
-          <button
+          <Button
+            type="button"
             onClick={save}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            className="rounded-full px-5"
           >
             {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
             Save my setup
-          </button>
+          </Button>
         </div>
       )}
     </section>

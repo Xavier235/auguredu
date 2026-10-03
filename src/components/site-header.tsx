@@ -7,6 +7,7 @@ import { tierLabel } from "@/lib/payments-config";
 import { NotificationCenter } from "@/components/notification-center";
 import { useTheme } from "@/hooks/use-theme";
 import { Sun, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -61,7 +62,7 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="relative z-50 w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
         <Link to="/" className="flex items-center gap-2 group">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent glow-primary">
@@ -91,6 +92,18 @@ export function SiteHeader() {
             );
           })}
         </nav>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={toggle}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          className="h-10 w-10 shrink-0 rounded-full bg-background/50"
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
 
         {/* Desktop search */}
         <form
@@ -145,23 +158,18 @@ export function SiteHeader() {
           )}
         </div>
 
-        <button
-          onClick={toggle}
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background/50"
-        >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
-
         {/* Mobile menu toggle */}
-        <button
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background/50 2xl:hidden"
+          className="h-10 w-10 shrink-0 rounded-full bg-background/50 2xl:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        </Button>
       </div>
 
       {/* Mobile drawer */}
