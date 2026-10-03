@@ -9,14 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { classifyEmail, friendlyAuthError } from "@/lib/student-email";
+import { pageMeta, canonical } from "@/lib/seo";
 
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
-    meta: [
-      { title: "Sign in · Augur.edu" },
-      { name: "description", content: "Sign in or create your Augur.edu account to save predictions." },
-    ],
+    meta: pageMeta({
+      title: "Sign in · Augur.edu",
+      description: "Sign in or create your Augur.edu account to save predictions and personalize your study tools.",
+      path: "/auth",
+    }),
+    links: canonical("/auth"),
   }),
   component: AuthPage,
 });

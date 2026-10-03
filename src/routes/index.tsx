@@ -3,6 +3,7 @@ import { pageMeta, canonical, organisationJsonLd } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { IgcseWaitlist } from "@/components/igcse-waitlist";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowRight,
   Brain,
@@ -29,6 +30,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { user } = useAuth();
+  const displayName = typeof user?.user_metadata?.display_name === "string"
+    ? user.user_metadata.display_name.trim().split(/\s+/)[0]
+    : "";
+
   return (
     <div className="bg-grid min-h-screen">
       <SiteHeader />
@@ -37,6 +43,11 @@ function Home() {
         {/* Hero */}
         <section className="mx-auto max-w-7xl px-6 pt-20 pb-24 md:pt-28">
           <div className="mx-auto max-w-4xl text-center">
+            {user && (
+              <p className="mb-4 text-sm font-semibold text-primary">
+                Welcome back{displayName ? `, ${displayName}` : ""}.
+              </p>
+            )}
             <div className="mb-8 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Built on outcomes from 200k+ student profiles
