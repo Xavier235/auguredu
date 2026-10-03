@@ -92,6 +92,7 @@
   },
   "overrides": {
     "browserslist": "4.28.7",
+    "dompurify": "3.4.16",
     "js-yaml": "4.3.2",
     "seroval": "1.5.3",
     "sharp": "0.35.4",
