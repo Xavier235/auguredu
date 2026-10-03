@@ -94,7 +94,7 @@
     "browserslist": "4.28.7",
     "dompurify": "3.4.16",
     "js-yaml": "4.3.2",
-    "seroval": "1.5.3",
+    "seroval": "1.6.8",
     "sharp": "0.35.4",
     "undici": "7.29.1",
     "ws": "8.21.0"
