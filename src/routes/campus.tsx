@@ -625,6 +625,13 @@ function CampusPage() {
                           {joined ? <LogOut className="h-3 w-3" /> : <LogIn className="h-3 w-3" />}
                           {joined ? "Leave group" : "Join group"}
                         </button>
+                        {joined && user && (
+                          <GroupChat
+                            groupId={g.id}
+                            userId={user.id}
+                            senderName={String(user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? "Student").slice(0, 60)}
+                          />
+                        )}
                       </div>
                     );
                   })}
