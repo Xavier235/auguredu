@@ -137,6 +137,7 @@ function ExamPage() {
   }
 
   function reset() {
+    setLive({ data: { questions: [] } }).catch(() => {});
     setQuestions(null);
     setSubmitted(false);
     setAnswers({});

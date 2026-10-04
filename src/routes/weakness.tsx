@@ -40,7 +40,7 @@ function WeaknessPage() {
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         <h1 className="font-display text-3xl font-bold sm:text-4xl">Your weakness report</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Built from every practice test you finish in the CBT exam.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Built from every practice test you finish in Exams.</p>
 
         {!user && !loading ? (
           <p className="mt-8 text-sm">
