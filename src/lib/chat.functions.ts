@@ -4,6 +4,7 @@ import { z } from "zod";
 import { cleanAugurText, STYLE_RULES } from "@/lib/text-clean";
 import { LIBRARY_INDEX } from "@/lib/library-catalogue";
 import { LIBRARY } from "@/lib/library";
+import { REPLY_STYLES, REPLY_STYLE_KEYS, EXAM_BLOCK_MESSAGE, matchesExamQuestion, liveExamQuestions } from "@/lib/reply-style";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
@@ -415,6 +416,7 @@ const sendSchema = z.object({
   mode: z
     .enum(["study-buddy", "drill", "waec", "neco", "blueprint", "paper", "pastq"])
     .default("study-buddy"),
+  style: z.enum(REPLY_STYLE_KEYS).default("balanced"),
 });
 
 export const sendChatMessage = createServerFn({ method: "POST" })
@@ -422,6 +424,10 @@ export const sendChatMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => sendSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    if (matchesExamQuestion(data.content, await liveExamQuestions(supabase, userId))) {
+      throw new Error(EXAM_BLOCK_MESSAGE);
+    }
 
     await enforceQuota(supabase, userId, "chat");
 
@@ -454,7 +460,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
 
     const live = await webContext(data.content, data.mode);
 
-    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], who, libraryHint(data.content), live]
+    const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], REPLY_STYLES[data.style].prompt, who, libraryHint(data.content), live]
       .filter(Boolean)
       .join("\n\n");
     const messages: ChatMsg[] = [{ role: "system", content: systemContent }];
@@ -727,6 +733,9 @@ export const askLecturer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    if (matchesExamQuestion(data.question, await liveExamQuestions(supabase, userId))) {
+      throw new Error(EXAM_BLOCK_MESSAGE);
+    }
     await enforceQuota(supabase, userId, "lecturer");
 
     // Every prior turn in this thread, so the Professor remembers the conversation.

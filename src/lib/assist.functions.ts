@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { cleanAugurText, STYLE_RULES } from "@/lib/text-clean";
 import { FREE_EXPLAIN_LIMIT, trackLabel, streamLabel } from "@/lib/track";
+import { REPLY_STYLES, REPLY_STYLE_KEYS, EXAM_BLOCK_MESSAGE, matchesExamQuestion, liveExamQuestions } from "@/lib/reply-style";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
@@ -191,11 +192,15 @@ export const augurAssist = createServerFn({ method: "POST" })
           .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(3000) }))
           .max(12)
           .default([]),
+        style: z.enum(REPLY_STYLE_KEYS).default("balanced"),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
+    if (matchesExamQuestion(data.message, await liveExamQuestions(supabase, userId))) {
+      return { answer: EXAM_BLOCK_MESSAGE };
+    }
     const who = await whoIsThis(supabase, userId);
     await bumpUsage(supabase, userId, "assist");
 
@@ -204,7 +209,7 @@ export const augurAssist = createServerFn({ method: "POST" })
       .join("\n");
 
     const answer = await ask(
-      `You are Augur, a Nigerian study companion embedded in the Augur.edu app. The student is on the ${data.page} page right now, so answer in the context of what that page does. Be brief and useful: two short paragraphs at most, or a tight list of steps. If a full lesson is needed, answer the core of it and mention they can continue in the full chat.${who}`,
+      `You are Augur, a Nigerian study companion embedded in the Augur.edu app. The student is on the ${data.page} page right now, so answer in the context of what that page does. Be brief and useful: two short paragraphs at most, or a tight list of steps. If a full lesson is needed, answer the core of it and mention they can continue in the full chat. ${REPLY_STYLES[data.style].prompt}${who}`,
       transcript ? `${transcript}\nStudent: ${data.message}` : data.message,
     );
 
