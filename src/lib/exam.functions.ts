@@ -96,3 +96,20 @@ export const getWeaknessReport = createServerFn({ method: "GET" })
         .sort((a, b) => a.pct - b.pct),
     };
   });
+
+/** Remembers the questions of the exam in progress so Augur refuses to answer them. */
+export const setLiveExamQuestions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ questions: z.array(z.string().max(2000)).max(100) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context as any;
+    await supabase.from("exam_live_questions").delete().eq("user_id", userId);
+    if (data.questions.length) {
+      await supabase
+        .from("exam_live_questions")
+        .insert(data.questions.map((question) => ({ user_id: userId, question })));
+    }
+    return { ok: true };
+  });

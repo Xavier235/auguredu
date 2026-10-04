@@ -36,7 +36,7 @@ export function SiteHeader() {
     { to: "/", label: "Home" },
     { to: "/predictor", label: "JAMB Predictor" },
     { to: "/cgpa", label: "CGPA" },
-    { to: "/exam", label: "CBT Exam" },
+    { to: "/exam", label: "Exams" },
     { to: "/study-plan", label: "Study Plan" },
     { to: "/library", label: "Library" },
     { to: "/projects", label: "Projects" },
