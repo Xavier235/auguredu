@@ -8,14 +8,14 @@ import { generateExam, type ExamQuestion } from "@/lib/academics.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 import { toast } from "sonner";
 import { ExplainButton } from "@/components/explain-button";
-import { saveExamAttempt } from "@/lib/exam.functions";
+import { saveExamAttempt, setLiveExamQuestions } from "@/lib/exam.functions";
 import { SSCE_SUBJECTS } from "@/lib/exam-library";
 import { Loader2, Timer, Play, RotateCcw, CheckCircle2, XCircle, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/exam")({
   head: () => ({
     meta: pageMeta({
-      title: "Live CBT Exam Simulator, JAMB and University Practice | Augur.edu",
+      title: "Exams, JAMB, WAEC, NECO and University Practice | Augur.edu",
       description:
         "Sit a timed computer based test for JAMB, Post UTME or any Nigerian university course code, get instant scoring and full explanations for every question.",
       path: "/exam",
@@ -51,6 +51,7 @@ function ExamPage() {
   const { user } = useAuth();
   const build = useServerFn(generateExam);
   const save = useServerFn(saveExamAttempt);
+  const setLive = useServerFn(setLiveExamQuestions);
   const [saved, setSaved] = useState(false);
 
   const [mode, setMode] = useState<"jamb" | "waec" | "neco" | "post-utme" | "course">("jamb");
@@ -91,6 +92,7 @@ function ExamPage() {
   }, [questions, answers]);
 
   useEffect(() => {
+    if (submitted && user) setLive({ data: { questions: [] } }).catch(() => {});
     if (!submitted || !questions || saved || !user) return;
     setSaved(true);
     const byTopic = new Map<string, { topic: string; correct: number; total: number }>();
@@ -120,6 +122,7 @@ function ExamPage() {
     try {
       const r = await build({ data: { subject: s, mode, count, difficulty } });
       setQuestions(r.questions);
+      setLive({ data: { questions: r.questions.map((x) => x.q) } }).catch(() => {});
       setTitle(r.title);
       setAnswers({});
       setIndex(0);
@@ -147,7 +150,7 @@ function ExamPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-        <h1 className="font-display text-3xl font-bold sm:text-4xl">Live CBT exam simulator</h1>
+        <h1 className="font-display text-3xl font-bold sm:text-4xl">Exams</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Sit a real timed computer based test. Pick JAMB, WAEC, NECO, Post UTME screening or any university course code, answer
           under the clock, then see your score with a full explanation for every question.

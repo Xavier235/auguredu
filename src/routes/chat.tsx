@@ -99,6 +99,7 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [mode, setMode] = useState<ChatMode>("study-buddy");
+  const [replyStyle, setReplyStyle] = useReplyStyle();
   const [uploading, setUploading] = useState(false);
   const [pendingAttachment, setPendingAttachment] = useState<
     { path: string; name: string; mimeType: string } | null
@@ -228,7 +229,7 @@ function ChatPage() {
         await ask({ data: { threadId, question: contentToSend } });
       } else {
         await send({
-          data: { threadId, content: contentToSend, attachments: attToSend, mode },
+          data: { threadId, content: contentToSend, attachments: attToSend, mode, style: replyStyle },
         });
       }
       // Reload messages fresh (gets real IDs + signed URLs)
@@ -500,6 +501,9 @@ function ChatPage() {
                       {CHAT_MODES[m]}
                     </button>
                   ))}
+                  <div className="ml-auto">
+                    <ReplyStylePicker value={replyStyle} onChange={setReplyStyle} />
+                  </div>
                 </div>
               )}
 

@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { augurAssist } from "@/lib/assist.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { useReplyStyle, ReplyStylePicker } from "@/hooks/use-reply-style";
 import { MessageCircle, X, Send, Loader2, GraduationCap } from "lucide-react";
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -21,6 +22,7 @@ export function AugurBubble() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
+  const [style, setStyle] = useReplyStyle();
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function AugurBubble() {
     setText("");
     setBusy(true);
     try {
-      const res = await assist({ data: { message: q, page: location.pathname, history } });
+      const res = await assist({ data: { message: q, page: location.pathname, history, style } });
       setTurns((t) => [...t, { role: "assistant", content: (res as any).answer }]);
     } catch (e: any) {
       setTurns((t) => [
@@ -116,6 +118,7 @@ export function AugurBubble() {
           </div>
 
           <div className="border-t border-border p-3">
+            <div className="mb-2"><ReplyStylePicker value={style} onChange={setStyle} /></div>
             <div className="flex items-center gap-2">
               <input
                 value={text}
