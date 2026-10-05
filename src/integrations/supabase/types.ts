@@ -788,30 +788,11 @@ export type Database = {
           new_count: number
         }[]
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_group_member: {
-        Args: { _group_id: string; _user_id: string }
-        Returns: boolean
-      }
-      my_study_school: { Args: never; Returns: string }
       my_usage_today: {
         Args: never
         Returns: {
           count: number
           feature: string
-        }[]
-      }
-      study_group_counts: {
-        Args: never
-        Returns: {
-          group_id: string
-          members: number
         }[]
       }
     }
