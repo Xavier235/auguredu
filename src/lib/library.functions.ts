@@ -107,18 +107,11 @@ export const verifyLibraryRead = createServerFn({ method: "POST" })
         meta: { item_id: item.id, course_code: item.courseCode, score: scorePct },
       });
 
-      const { data: xpRow } = await (supabase as any)
-        .from("user_xp")
-        .select("xp, level")
-        .eq("user_id", userId)
-        .maybeSingle();
-      const newXp = ((xpRow as any)?.xp ?? 0) + awarded;
-      const newLevel = Math.max(1, Math.floor(newXp / 250) + 1);
-      if (xpRow) {
-        await (supabase as any).from("user_xp").update({ xp: newXp, level: newLevel }).eq("user_id", userId);
-      } else {
-        await (supabase as any).from("user_xp").insert({ user_id: userId, xp: newXp, level: newLevel });
-      }
+      const { error: xpErr } = await (supabase as any).rpc("add_user_xp", {
+        _points: awarded,
+        _level_divisor: 250,
+      });
+      if (xpErr) throw new Error(xpErr.message);
 
       await (supabase as any).from("notifications").insert({
         user_id: userId,

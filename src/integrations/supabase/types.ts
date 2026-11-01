@@ -560,6 +560,7 @@ export type Database = {
           level: string
           meeting_place: string
           meeting_time: string
+          member_count: number
           name: string
           school: string
           topic: string
@@ -574,6 +575,7 @@ export type Database = {
           level?: string
           meeting_place?: string
           meeting_time?: string
+          member_count?: number
           name: string
           school?: string
           topic?: string
@@ -588,6 +590,7 @@ export type Database = {
           level?: string
           meeting_place?: string
           meeting_time?: string
+          member_count?: number
           name?: string
           school?: string
           topic?: string
@@ -780,6 +783,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_user_xp: {
+        Args: { _level_divisor?: number; _points: number }
+        Returns: {
+          level: number
+          xp: number
+        }[]
+      }
       consume_quota: {
         Args: { _feature: string; _limit: number }
         Returns: {

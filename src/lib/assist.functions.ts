@@ -139,7 +139,7 @@ export const getAssistStatus = createServerFn({ method: "GET" })
 /** "I am stuck on this question" — works inside the CBT exam and elsewhere. */
 export const explainQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         question: z.string().min(3).max(2000),
@@ -183,7 +183,7 @@ export const explainQuestion = createServerFn({ method: "POST" })
 /** The floating Augur helper that lives on every page. */
 export const augurAssist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         message: z.string().min(1).max(1500),
