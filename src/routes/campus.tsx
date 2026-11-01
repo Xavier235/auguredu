@@ -197,19 +197,18 @@ function CampusPage() {
       return;
     }
     setLoading(true);
-    const [{ data: mine }, { data: allProfiles }, { data: allGroups }, { data: members }, { data: groupCounts }] = await Promise.all([
+    const [{ data: mine }, { data: allProfiles }, { data: allGroups }, { data: members }] = await Promise.all([
       supabase.from("study_profiles").select("*").eq("user_id", user.id).maybeSingle(),
       supabase.from("study_profiles").select("*").eq("discoverable", true).limit(300),
-      supabase.from("study_groups").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("study_groups").select("*, member_count").order("created_at", { ascending: false }).limit(100),
       supabase.from("study_group_members").select("group_id, user_id").eq("user_id", user.id),
-      (supabase as any).rpc("study_group_counts"),
     ]);
     if (mine) setMe({ ...EMPTY, ...(mine as any) });
     setPeers(((allProfiles ?? []) as any[]).filter((p) => p.user_id !== user.id));
     setGroups((allGroups ?? []) as any[]);
     const tally: Record<string, number> = {};
     const mineIds: string[] = [];
-    for (const c of (groupCounts ?? []) as any[]) tally[c.group_id] = Number(c.members) || 0;
+    for (const g of (allGroups ?? []) as any[]) tally[g.id] = Number(g.member_count) || 0;
     for (const m of (members ?? []) as any[]) mineIds.push(m.group_id);
     setCounts(tally);
     setMyGroups(mineIds);

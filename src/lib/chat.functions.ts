@@ -629,23 +629,15 @@ export const awardReadingXp = createServerFn({ method: "POST" })
       .gte("created_at", today.toISOString());
     if ((count ?? 0) > 200) return { awarded: 0, reason: "daily reading cap reached" };
 
-    // Upsert user_xp
-    const { data: existing } = await (supabase as any)
-      .from("user_xp")
-      .select("xp, level")
-      .eq("user_id", userId)
-      .maybeSingle();
-    const newXp = ((existing as any)?.xp ?? 0) + points;
-    const newLevel = Math.max(1, Math.floor(newXp / 50) + 1);
-    if (existing) {
-      await (supabase as any).from("user_xp").update({ xp: newXp, level: newLevel }).eq("user_id", userId);
-    } else {
-      await (supabase as any)
-        .from("user_xp")
-        .insert({ user_id: userId, xp: newXp, level: newLevel });
-    }
+    // Award XP through the validated server routine — users cannot write user_xp directly.
+    const { data: xpRow, error: xpErr } = await (supabase as any).rpc("add_user_xp", {
+      _points: points,
+      _level_divisor: 50,
+    });
+    if (xpErr) throw new Error(xpErr.message);
+    const row = Array.isArray(xpRow) ? xpRow[0] : xpRow;
 
-    return { awarded: points, total: newXp, level: newLevel };
+    return { awarded: points, total: row?.xp ?? 0, level: row?.level ?? 1 };
   });
 
 export const getMyXp = createServerFn({ method: "GET" })

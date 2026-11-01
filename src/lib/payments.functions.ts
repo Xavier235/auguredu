@@ -116,9 +116,15 @@ export const listMyPaymentRequests = createServerFn({ method: "GET" })
   });
 
 async function ensureAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+  // Admin roles live in user_roles (readable for own rows) — the old has_role RPC is now server-only.
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .limit(1);
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden — admin only");
+  if (!data?.length) throw new Error("Forbidden — admin only");
 }
 
 export const listAllPaymentRequests = createServerFn({ method: "POST" })
@@ -184,9 +190,11 @@ export const decidePaymentRequest = createServerFn({ method: "POST" })
 export const amIAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    return { admin: !!data };
+    const { data } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .limit(1);
+    return { admin: !!data?.length };
   });
