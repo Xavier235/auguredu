@@ -84,7 +84,10 @@ async function enforceQuota(supabase: any, userId: string, feature: Feature) {
   if ((prof as any)?.subscription_tier && (prof as any).subscription_tier !== "free") {
     return { allowed: true as const, count: 0, limit: -1 };
   }
-  const { data, error } = await supabase.rpc("consume_quota", {
+  // Quota counting runs through the server-only routine — clients cannot call it.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin as any).rpc("consume_server_quota", {
+    _user_id: userId,
     _feature: feature,
     _limit: FREE_LIMITS[feature],
   });
