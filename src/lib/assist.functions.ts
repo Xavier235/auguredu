@@ -71,7 +71,10 @@ async function tierOf(supabase: any, userId: string) {
 async function spendExplain(supabase: any, userId: string) {
   const tier = await tierOf(supabase, userId);
   if (tier !== "free") return { tier, left: -1 };
-  const { data, error } = await supabase.rpc("consume_quota", {
+  // Quota counting runs through the server-only routine — clients cannot call it.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin as any).rpc("consume_server_quota", {
+    _user_id: userId,
     _feature: "explain",
     _limit: FREE_EXPLAIN_LIMIT,
   });
