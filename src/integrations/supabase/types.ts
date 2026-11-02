@@ -798,6 +798,14 @@ export type Database = {
           new_count: number
         }[]
       }
+      consume_server_quota: {
+        Args: { _feature: string; _limit: number; _user_id: string }
+        Returns: {
+          allowed: boolean
+          day_limit: number
+          new_count: number
+        }[]
+      }
       my_usage_today: {
         Args: never
         Returns: {
