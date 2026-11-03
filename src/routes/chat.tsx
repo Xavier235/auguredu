@@ -35,6 +35,7 @@ import {
   Menu,
   BrainCircuit,
   X,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -72,6 +73,7 @@ type Message = {
   role: "user" | "assistant" | "system";
   content: string;
   attachments: Attachment[];
+  sources?: { title: string; snippet?: string; url: string }[] | null;
   created_at: string;
 };
 
@@ -647,6 +649,27 @@ function Bubble({ m }: { m: Message }) {
             <div key={i}>{renderContent(line)}</div>
           ))}
         </div>
+        {!mine && m.sources && m.sources.length > 0 && (
+          <div className="mt-3 border-t border-border/40 pt-2">
+            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <Globe className="h-3 w-3" /> From the web
+            </div>
+            <ul className="space-y-1">
+              {m.sources.slice(0, 5).map((s, i) => (
+                <li key={i}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="line-clamp-1 block text-xs text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                  >
+                    {s.title || s.url}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {!mine && m.content.trim().length > 0 && <SpeakButton text={cleanAugurText(m.content)} />}
       </div>
     </div>
