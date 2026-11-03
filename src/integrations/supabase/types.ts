@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           id: string
           role: string
+          sources: Json
           thread_id: string
           user_id: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           id?: string
           role: string
+          sources?: Json
           thread_id: string
           user_id: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           id?: string
           role?: string
+          sources?: Json
           thread_id?: string
           user_id?: string
         }
