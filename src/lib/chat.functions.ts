@@ -415,6 +415,7 @@ export const listMessages = createServerFn({ method: "GET" })
       role: "user" | "assistant" | "system";
       content: string;
       attachments: Attachment[];
+      sources: WebHit[] | null;
       created_at: string;
     }>;
   });
@@ -478,7 +479,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
 
     const who = await studentContext(supabase, userId);
 
-    const live = await webContext(data.content, data.mode);
+    const { context: live, hits: webHits } = await webContext(data.content, data.mode);
 
     const systemContent = [SYSTEM_PROMPT, todayLine(), MODE_PROMPTS[data.mode], REPLY_STYLES[data.style].prompt, who, libraryHint(data.content), live]
       .filter(Boolean)
@@ -511,6 +512,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       role: "assistant",
       content: assistantContent,
       attachments: [],
+      sources: webHits,
     });
     if (aErr) throw new Error(aErr.message);
 
