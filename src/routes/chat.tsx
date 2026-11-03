@@ -35,6 +35,7 @@ import {
   Menu,
   BrainCircuit,
   X,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";

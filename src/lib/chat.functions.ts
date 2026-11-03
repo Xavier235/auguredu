@@ -770,6 +770,8 @@ export const askLecturer = createServerFn({ method: "POST" })
 
     const who = await studentContext(supabase, userId);
 
+    const { context: live, hits: webHits } = await webContext(data.question, "study-buddy");
+
     await (supabase as any).from("chat_messages_v2").insert({
       thread_id: data.threadId,
       user_id: userId,
@@ -783,7 +785,7 @@ export const askLecturer = createServerFn({ method: "POST" })
         [
           {
             role: "system",
-            content: `${LECTURER_PROMPT}\n\n${todayLine()}${who}${courseContext(data.question)}${libraryHint(data.question)}`,
+            content: `${LECTURER_PROMPT}\n\n${todayLine()}${who}${courseContext(data.question)}${libraryHint(data.question)}${live}`,
           },
           ...history,
           { role: "user", content: data.question },
@@ -798,6 +800,7 @@ export const askLecturer = createServerFn({ method: "POST" })
       role: "assistant",
       content: reply,
       attachments: [],
+      sources: webHits,
     });
 
     await updateMemory(supabase, userId, data.question, reply);
