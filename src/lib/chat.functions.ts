@@ -236,17 +236,23 @@ export async function webLookup(query: string, limit = 5): Promise<WebHit[]> {
   return [];
 }
 
-async function webContext(question: string, mode: string) {
+async function webContext(question: string, mode: string): Promise<{ context: string; hits: WebHit[] }> {
   const wanted = needsWeb(question) || mode === "waec" || mode === "neco" || mode === "pastq";
-  if (!wanted) return "";
+  if (!wanted) return { context: "", hits: [] };
   const hits = await webLookup(question, 5);
   if (hits.length === 0) {
-    return "\n\nLIVE WEB LOOKUP: nothing usable came back this time. Answer from what you know and tell the student plainly that you could not check the internet just now.";
+    return {
+      context:
+        "\n\nLIVE WEB LOOKUP: nothing usable came back this time. Answer from what you know and tell the student plainly that you could not check the internet just now.",
+      hits: [],
+    };
   }
-  return (
-    "\n\nLIVE WEB RESULTS fetched just now for this question. Use them for anything current or factual, quote figures carefully, and list the sources you actually used at the end under a short line that says Sources, one per line as title then link.\n" +
-    hits.map((h, i) => `${i + 1}. ${h.title}\n${h.snippet}\n${h.url}`).join("\n\n")
-  );
+  return {
+    context:
+      "\n\nLIVE WEB RESULTS fetched just now for this question. Use them for anything current or factual, quote figures carefully, and do not invent a separate source list at the end; the page will show the real links under your reply.\n" +
+      hits.map((h, i) => `${i + 1}. ${h.title}\n${h.snippet}\n${h.url}`).join("\n\n"),
+    hits,
+  };
 }
 
 // -------- Who the student is, and what Augur remembers about them --------
