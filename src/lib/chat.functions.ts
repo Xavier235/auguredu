@@ -149,6 +149,10 @@ const FRESH_HINTS = [
   "latest", "today", "this year", "current", "news", "2025", "2026", "2027",
   "cut off", "cutoff", "registration", "deadline", "timetable", "date", "when is",
   "waec", "neco", "jamb", "utme", "post utme", "syllabus", "result", "price",
+  "how much", "fee", "admission list", "apply", "requirements", "closing",
+  "who is", "what is", "where is", "when was", "history of", "definition of",
+  "statistics", "rank", "population", "cost", "amount", "update",
+  "which university", "which school", "list of", "release", "announced",
 ];
 
 function needsWeb(question: string) {
@@ -171,58 +175,65 @@ function stripTags(html: string) {
 
 type WebHit = { title: string; snippet: string; url: string };
 
-/** Free, keyless web lookup: DuckDuckGo HTML with a Wikipedia fallback. */
-export async function webLookup(query: string, limit = 5): Promise<WebHit[]> {
+function parseDuckResults(html: string, limit: number): WebHit[] {
   const hits: WebHit[] = [];
-  try {
-    const res = await fetch("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query), {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; AugurEdu/1.0)" },
+  const blocks = html.split('class="result__body"').slice(1, limit + 3);
+  for (const b of blocks) {
+    const linkMatch = b.match(/result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+    const snipMatch = b.match(/result__snippet"[^>]*>([\s\S]*?)<\/a>/);
+    if (!linkMatch) continue;
+    let url = linkMatch[1];
+    const uddg = url.match(/uddg=([^&]+)/);
+    if (uddg) url = decodeURIComponent(uddg[1]);
+    hits.push({
+      title: stripTags(linkMatch[2]).slice(0, 160),
+      snippet: stripTags(snipMatch?.[1] ?? "").slice(0, 400),
+      url,
     });
-    if (res.ok) {
-      const html = await res.text();
-      const blocks = html.split('class="result__body"').slice(1, limit + 3);
-      for (const b of blocks) {
-        const linkMatch = b.match(/result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
-        const snipMatch = b.match(/result__snippet"[^>]*>([\s\S]*?)<\/a>/);
-        if (!linkMatch) continue;
-        let url = linkMatch[1];
-        const uddg = url.match(/uddg=([^&]+)/);
-        if (uddg) url = decodeURIComponent(uddg[1]);
-        hits.push({
-          title: stripTags(linkMatch[2]).slice(0, 160),
-          snippet: stripTags(snipMatch?.[1] ?? "").slice(0, 400),
-          url,
-        });
-        if (hits.length >= limit) break;
-      }
-    }
-  } catch {
-    // fall through to Wikipedia
-  }
-
-  if (hits.length === 0) {
-    try {
-      const res = await fetch(
-        "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=" +
-          limit +
-          "&srsearch=" +
-          encodeURIComponent(query),
-      );
-      if (res.ok) {
-        const data: any = await res.json();
-        for (const r of data?.query?.search ?? []) {
-          hits.push({
-            title: r.title,
-            snippet: stripTags(r.snippet ?? "").slice(0, 400),
-            url: "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(r.title).replace(/ /g, "_")),
-          });
-        }
-      }
-    } catch {
-      // no live data available
-    }
+    if (hits.length >= limit) break;
   }
   return hits;
+}
+
+/** Free, keyless web lookup: DuckDuckGo (two mirrors) with a Wikipedia fallback. */
+export async function webLookup(query: string, limit = 5): Promise<WebHit[]> {
+  const headers = { "User-Agent": "Mozilla/5.0 (compatible; AugurEdu/1.0)" };
+
+  for (const mirror of ["https://html.duckduckgo.com/html/?q=", "https://lite.duckduckgo.com/lite/?q="]) {
+    try {
+      const res = await fetch(mirror + encodeURIComponent(query), { headers });
+      if (res.ok) {
+        const hits = parseDuckResults(await res.text(), limit);
+        if (hits.length > 0) return hits;
+      }
+    } catch {
+      // try the next source
+    }
+  }
+
+  try {
+    const res = await fetch(
+      "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=" +
+        limit +
+        "&srsearch=" +
+        encodeURIComponent(query),
+    );
+    if (res.ok) {
+      const data: any = await res.json();
+      const hits: WebHit[] = [];
+      for (const r of data?.query?.search ?? []) {
+        hits.push({
+          title: r.title,
+          snippet: stripTags(r.snippet ?? "").slice(0, 400),
+          url: "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(r.title).replace(/ /g, "_")),
+        });
+      }
+      return hits;
+    }
+  } catch {
+    // no live data available
+  }
+  return [];
 }
 
 async function webContext(question: string, mode: string) {
