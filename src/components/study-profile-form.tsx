@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DEPARTMENTS } from "@/lib/course-catalogue";
 import { SCHOOLS, areasFor, schoolByName } from "@/lib/campus-data";
-import { Input } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Save, Loader2, GraduationCap } from "lucide-react";
 
