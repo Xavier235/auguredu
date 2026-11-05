@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { KeyRound, LogOut, Mail, ShieldCheck, ArrowLeft } from "lucide-react";
+import { KeyRound, LogOut, Mail, ShieldCheck, ArrowLeft, Users } from "lucide-react";
+import { StudyProfileForm } from "@/components/study-profile-form";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -96,6 +97,18 @@ function SettingsPage() {
                 </dd>
               </div>
             </dl>
+          </section>
+
+          <section className="glass rounded-3xl p-6">
+            <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+              <Users className="h-4 w-4 text-primary" /> Study profile
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your school, department, level and study details. Campus matching, groups and chats use these.
+            </p>
+            <div className="mt-5">
+              <StudyProfileForm />
+            </div>
           </section>
 
           <section className="glass rounded-3xl p-6">
